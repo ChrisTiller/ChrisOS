@@ -110,6 +110,11 @@ void Window::setParent(Window &window)
 	mParent = &window;
 }
 
+void Window::setSize(sf::Vector2f size)
+{
+	setSize(size.x, size.y);
+}
+
 void Window::setSize(const float x, const float y)
 {
 	sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);

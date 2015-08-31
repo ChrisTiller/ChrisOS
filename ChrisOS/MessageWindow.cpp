@@ -13,11 +13,11 @@ MessageWindow::~MessageWindow()
 uint MessageWindow::show(int posX, int posY, int sizeX, int sizeY, std::string title)
 {
 	mMsgBox.setWindowPosition(posX, posY);
-	mMsgBox.setSize(sf::Vector2f(sizeX, sizeY));
+	//mMsgBox.setSize(sizeX, sizeY);
 
 
 	mTitleBar.setWindowPosition(0, 0);
-	mTitleBar.setSize(sf::Vector2f(sizeX, 32));
+	//mTitleBar.setSize(sf::Vector2f(sizeX, 32));
 	mTitleBar.setFont("Oswald-Light.ttf");
 	mTitleBar.setText(title);
 	mTitleBar.setFontSize(20.0f);

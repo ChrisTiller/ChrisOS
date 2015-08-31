@@ -11,6 +11,11 @@ Button::~Button()
 {
 }
 
+float Button::getTextWidth()
+{
+	return mLabel.getTextLength();
+}
+
 void Button::setFont(const std::string fontName, const float fontSize)
 {
 	mLabel.setFont(fontName);

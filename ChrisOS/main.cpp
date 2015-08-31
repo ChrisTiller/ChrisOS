@@ -10,8 +10,8 @@ void controlCallBack(Control &control, MessageQueue &messageQueue);
 int main()
 {
 
-	System::init(1920, 1080, true);
-	//System::init(800, 600, false);
+	//System::init(1920, 1080, true);
+	System::init(800, 600, false);
 
 	System::systemLoop();
 

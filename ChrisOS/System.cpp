@@ -235,6 +235,8 @@ void System::systemLoop()
 	dp = dp->getInstance();
 
 	//dp->setBackground("background-hd-wallpapers.jpg", 1920, 1080);
+	dp->setWindowPosition(0, 0);
+	dp->setSize(1920, 1080);
 	dp->setBackgroundColor(0, 0, 180, 200);
 
 	DesktopEventHandler dpHandle;
@@ -261,12 +263,12 @@ void System::systemLoop()
 
 	dateTime.setWindowID(DATE_TIME);
 	tskbar.attachWindow(dateTime);
-	dateTime.setWindowPosition((tskbar.getSize().x / 2) - (dateTime.getSize().x / 2), 2);
+	dateTime.setWindowPosition((tskbar.getSize().x / 2) - (dateTime.getTextLength() / 2), 2);
 
 	tskbar.attachWindow(mPowerButton);
 	mPowerButton.setWindowPosition(1890.0f, 4.5f);
 
-	tskbar.setWindowID(TASKBAR);
+	tskbar.setWindowID(1);
 
 	dp->attachWindow(tskbar);
 
@@ -275,7 +277,7 @@ void System::systemLoop()
 	versionLabel.setFontSize(20.0f);
 	versionLabel.setTextColor(255, 255, 255, 255);
 	versionLabel.setBackgroundColor(255, 255, 255, 0);
-	versionLabel.setWindowID(4);
+	versionLabel.setWindowID(2);
 	dp->attachWindow(versionLabel);
 
 	versionLabel.setWindowPosition(1790, 1050);
@@ -316,6 +318,8 @@ void System::draw()
 	//mWindow.draw(sprite);
 	//mWindow.draw(taskBar);
 	//mWindow.draw(versionDisplay);
+	Desktop *dp = dp->getInstance();
+	mWindow.draw(*dp);
 }
 
 

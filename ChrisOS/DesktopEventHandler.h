@@ -9,9 +9,9 @@ public:
 	DesktopEventHandler();
 	~DesktopEventHandler();
 
-	void messageCallBack(Window *window, MessageQueue &messageQueue);
+	int messageCallBack(Window *window, MessageQueue &messageQueue);
 
-	void Button_LeftClick(Window *window, MessageQueue &msgQueue);
+	int Button_LeftClick(Window *window, MessageQueue &msgQueue);
 
 private:
 

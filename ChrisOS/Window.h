@@ -1,5 +1,7 @@
 #pragma once
 
+#include <map>
+#include <vector>
 #include <SFML/Graphics.hpp>
 
 #include "EventHandler.h"
@@ -18,6 +20,14 @@ enum ALIGNMENT
 	BOTTOM_RIGHT_ALIGNMENT
 };
 
+class Window;
+
+struct winZOrder
+{
+	int zOrder;
+	Window *window;
+};
+
 class Window : public sf::Drawable, public sf::Transformable
 {
 public:
@@ -31,9 +41,11 @@ public:
 	Window* getParent();
 	sf::Uint32 getWindowID();
 	sf::Vector2f getWindowPosition();
+	sf::FloatRect getWindowRect();
 	EventHandler *getEventHandler();
 
 	void attachWindow(Window &window);
+	void sendMessage(uint controlID, uint message, sf::Event &event);
 	void setBackgroundColor(const sf::Uint8 red, const sf::Uint8 green, const sf::Uint8 blue, const sf::Uint8 alpha = 255);
 	void setEventHandlerClass(EventHandler *eventHandlerClass);
 	void setOutlineColor(const sf::Uint8 red, const sf::Uint8 green, const sf::Uint8 blue, const sf::Uint8 alpha = 255);
@@ -45,7 +57,7 @@ public:
 	void setSize(const sf::Vector2f size);
 	void setWindowID(const sf::Uint32 windowID);
 
-	void events(sf::Event &event, sf::RenderWindow &window);
+	int events(sf::Event &event, sf::RenderWindow &window);
 	void drawMe(sf::RenderTarget &target, sf::RenderStates states) const;
 
 protected:
@@ -56,7 +68,8 @@ protected:
 
 	// vector of window pointers that point to child windows if any
 	std::vector<Window*> mChildren;
-
+	//std::multimap<int, Window*> mZOrderChildren;
+	std::vector<Window*> mZOrderChildren;
 
 private:
 

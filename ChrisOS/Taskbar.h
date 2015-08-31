@@ -5,7 +5,7 @@
 
 enum TASKBAR_WINDOWS
 {
-	POWER_BUTTON = 1,
+	POWER_BUTTON = 15,
 	DATE_TIME
 };
 

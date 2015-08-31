@@ -35,6 +35,11 @@ float Label::getFontSize()
 	return mText.getCharacterSize();
 }
 
+float Label::getTextLength()
+{
+	return mText.getLocalBounds().width;
+}
+
 void Label::setAlignment(sf::Uint32 alignmet)
 {
 	mAlignment = alignmet;

@@ -10,7 +10,7 @@ DesktopEventHandler::~DesktopEventHandler()
 {
 }
 
-void DesktopEventHandler::messageCallBack(Window *window, MessageQueue &messageQueue)
+int DesktopEventHandler::messageCallBack(Window *window, MessageQueue &messageQueue)
 {
 	static int xOffset;
 		static int yOffset;
@@ -114,11 +114,13 @@ void DesktopEventHandler::messageCallBack(Window *window, MessageQueue &messageQ
 			//}
 			messageQueue.removeMessage();
 		}
+		return 0;
 }
 
-void DesktopEventHandler::Button_LeftClick(Window *window, MessageQueue &msgQueue)
+int DesktopEventHandler::Button_LeftClick(Window *window, MessageQueue &msgQueue)
 {
 	Button *button = (Button*)window;
 
 	button->setText("Please?!");
+	return 0;
 }

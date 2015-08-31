@@ -12,6 +12,7 @@ public:
 	sf::Uint32 getAlignment();
 	std::string getFontName();
 	float getFontSize();
+	float getTextLength();
 
 	void setAlignment(sf::Uint32 alignmet);
 	void setFont(const std::string font);

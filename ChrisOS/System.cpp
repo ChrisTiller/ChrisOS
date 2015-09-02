@@ -2,12 +2,16 @@
 #include "Taskbar.h"
 
 
+#define SYSTEM_QUIT 1000
+
+
 int System::mResolutionX = 0;
 int System::mResolutionY = 0;
 sf::Vector2i System::mInternalResolution = { 1920, 1080 };
 sf::RenderWindow System::mWindow;
 struct tm System::now;
 time_t System::tNow;
+Label System::dateTime;
 //Control System::sprite;
 //Control System::taskBar;
 //Control System::versionDisplay;
@@ -257,7 +261,7 @@ void System::systemLoop()
 	mPowerButton.setWindowID(POWER_BUTTON);
 	mPowerButton.setImageAlignment(MIDDLE_MIDDLE_ALIGNMENT);
 
-	Label dateTime(System::getDateTime("mm/dd/yy", "hh:mm"));
+	//dateTime(System::getDateTime("mm/dd/yy", "hh:mm"));
 	dateTime.setSize(50.0f, 29.0f);
 	dateTime.setFontSize(28.0f);
 
@@ -284,33 +288,38 @@ void System::systemLoop()
 
 	while (mWindow.isOpen())
 	{
-
-		dateTime.setText(System::getDateTime("mm/dd/yy", "hh:mm"));
-		sf::Event event;
-		while (mWindow.pollEvent(event))
-		{
-			if (event.type == sf::Event::Closed)
-			{
-				mWindow.close();
-			}
-			if (event.type == sf::Event::KeyPressed)
-			{
-				switch (event.key.code)
-				{
-				case sf::Keyboard::Escape:
-					mWindow.close();
-					break;
-				default:
-					break;
-				}
-			}
-			dp->events(event, mWindow);
-		}
-
-		mWindow.clear();
-		mWindow.draw(*dp);
-		mWindow.display();
+		doEvents();
 	}
+}
+
+void System::doEvents()
+{
+
+	Desktop *dp = dp->getInstance();
+
+	dateTime.setText(System::getDateTime("mm/dd/yy", "hh:mm"));
+	sf::Event event;
+	while (mWindow.pollEvent(event))
+	{
+		if (event.type == sf::Event::Closed)
+		{
+			mWindow.close();
+		}
+		if (event.type == sf::Event::KeyPressed)
+		{
+			switch (event.key.code)
+			{
+			case sf::Keyboard::Escape:
+				mWindow.close();
+				break;
+			default:
+				break;
+			}
+		}
+		dp->events(event, mWindow);
+	}
+
+	draw();
 }
 
 void System::draw()
@@ -319,7 +328,9 @@ void System::draw()
 	//mWindow.draw(taskBar);
 	//mWindow.draw(versionDisplay);
 	Desktop *dp = dp->getInstance();
+	mWindow.clear();
 	mWindow.draw(*dp);
+	mWindow.display();
 }
 
 

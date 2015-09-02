@@ -12,11 +12,15 @@ enum MESSAGE_RETURN {
 class MessageWindow : public Window
 {
 public:
+	MessageWindow();
 	MessageWindow(int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt);
 	~MessageWindow();
 
-	uint show(int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt);
+	uint show(Desktop *dp, int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt);
 
+	bool isOpen();
+
+	void close();
 private:
 
 	Window mMsgBox;
@@ -26,5 +30,7 @@ private:
 
 	Label mTitleBar;
 	Label mPrompt;
+
+	bool mIsOpen;
 };
 

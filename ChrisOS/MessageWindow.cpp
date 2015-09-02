@@ -3,8 +3,8 @@
 
 MessageWindow::MessageWindow(int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt)
 {
-	this->setWindowPosition(posX, posY);
-	this->setSize(sizeX, sizeY);
+	setWindowPosition(posX, posY);
+	setSize(sizeX, sizeY);
 
 	mTitleBar.setWindowPosition(0, 0);
 	mTitleBar.setSize(sf::Vector2f(sizeX, 32));
@@ -12,34 +12,52 @@ MessageWindow::MessageWindow(int posX, int posY, int sizeX, int sizeY, std::stri
 	mTitleBar.setFontSize(20.0f);
 	mTitleBar.setText(title);
 	mTitleBar.setAlignment(MIDDLE_LEFT_ALIGNMENT);
+	mTitleBar.setBackgroundColor(0, 0, 0, 255);
 	mTitleBar.setWindowID(3);
 
-	this->attachWindow(mTitleBar);
+	attachWindow(mTitleBar);
 
-	mButtonOK.setText("OK");
-	mButtonOK.setFont("Oswald-Light.ttf", 25.0f);
-	mButtonOK.setWindowID(BUTTON_OK);
-	mButtonOK.setSize(50.0f, 26.0f);
 	mButtonOK.setWindowPosition(0, sizeY - 30.0f);
+	mButtonOK.setSize(50.0f, 26.0f);
+	mButtonOK.setFont("Oswald-Light.ttf", 25.0f);
+	mButtonOK.setText("OK");
+	mButtonOK.setWindowID(BUTTON_OK);
 
 	mButtonCancel = mButtonOK;
 
-	mButtonCancel.setText("Cancel");
-	mButtonCancel.setFont("Oswald-Light.ttf", 25.0f);
-	mButtonCancel.setWindowID(BUTTON_CANCEL);
 	mButtonCancel.setWindowPosition(60.0f, sizeY - 30.0f);
+	mButtonCancel.setSize(50.0f, 26.0f);
+	mButtonCancel.setFont("Oswald-Light.ttf", 25.0f);
+	mButtonCancel.setText("Cancel");
+	mButtonCancel.setWindowID(BUTTON_CANCEL);
 
-	this->attachWindow(mButtonOK);
-	this->attachWindow(mButtonCancel);
+	attachWindow(mButtonOK);
+	attachWindow(mButtonCancel);
 
+	mIsOpen = true;
 }
 
+MessageWindow::MessageWindow()
+{
+
+}
 
 MessageWindow::~MessageWindow()
 {
 }
 
-uint MessageWindow::show(int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt)
+uint MessageWindow::show(Desktop * dp, int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt)
 {
+	
 	return 0;
+}
+
+bool MessageWindow::isOpen()
+{
+	return mIsOpen;
+}
+
+void MessageWindow::close()
+{
+	mIsOpen = false;
 }

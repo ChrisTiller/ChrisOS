@@ -10,7 +10,7 @@ public:
 	~ResourceManager();
 
 	static sf::Texture& getTexture(const std::string& textureName);
-	static sf::Font getFont(std::string fontName);
+	static sf::Font& getFont(std::string fontName);
 
 private:
 	static TextureCache mTextureCache;

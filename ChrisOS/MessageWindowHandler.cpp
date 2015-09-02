@@ -10,7 +10,7 @@ MessageWindowHandler::~MessageWindowHandler()
 {
 }
 
-int MessageWindowHandler::messageCallBack(Window *window, MessageQueue &msgQueue)
+int MessageWindowHandler::messageCallBack(Window *parent, Window *child, MessageQueue &msgQueue)
 {
 	int returnValue = 0;
 	while (msgQueue.hasMessage())
@@ -20,8 +20,14 @@ int MessageWindowHandler::messageCallBack(Window *window, MessageQueue &msgQueue
 		case BUTTON_OK:
 			switch (msgQueue.getMessage().messageID)
 			{
+			case MOUSE_ENTER:
+				returnValue = ButtonOK_MouseEner(static_cast<MessageWindow*>(parent), static_cast<Button*>(child), msgQueue);
+				break;
+			case MOUSE_LEAVE:
+				returnValue = ButtonOK_MouseEner(static_cast<MessageWindow*>(parent), static_cast<Button*>(child), msgQueue);
+				break;
 			case LEFT_MOUSE_BUTTON_CLICK:
-				returnValue = ButtonOK_LeftClick((Button*)window, msgQueue);
+				returnValue = ButtonOK_LeftClick(static_cast<MessageWindow*>(parent), static_cast<Button*>(child), msgQueue);
 				break;
 			default:
 				break;
@@ -31,13 +37,14 @@ int MessageWindowHandler::messageCallBack(Window *window, MessageQueue &msgQueue
 			switch (msgQueue.getMessage().messageID)
 			{
 			case LEFT_MOUSE_BUTTON_CLICK:
-				returnValue = ButtonCancel_LeftClick((Button*)window, msgQueue);
+				returnValue = ButtonCancel_LeftClick(static_cast<MessageWindow*>(parent), static_cast<Button*>(child), msgQueue);
 				break;
 			default:
 				break;
 			}
 			break;
 		default:
+			
 			break;
 		}
 		msgQueue.removeMessage();
@@ -46,12 +53,26 @@ int MessageWindowHandler::messageCallBack(Window *window, MessageQueue &msgQueue
 }
 
 
-int MessageWindowHandler::ButtonOK_LeftClick(Button *button, MessageQueue &msgQueue)
+int MessageWindowHandler::ButtonOK_LeftClick(MessageWindow *parent, Button *button, MessageQueue &msgQueue)
 {
+	parent->close();
 	return BUTTON_OK;
 }
 
-int MessageWindowHandler::ButtonCancel_LeftClick(Button *button, MessageQueue &msgQueue)
+int MessageWindowHandler::ButtonOK_MouseEner(MessageWindow *parent, Button *button, MessageQueue &msgQueue)
+{
+	button->setFont("Oswald-Light.ttf", 25.0f);
+	button->setText("OK");
+	return 0;
+}
+int MessageWindowHandler::ButtonOK_MouseLeave(MessageWindow *parent, Button *button, MessageQueue &msgQueue)
+{
+	button->setFont("Oswald-Light.ttf", 25.0f);
+	button->setText("OK");
+	return 0;
+}
+
+int MessageWindowHandler::ButtonCancel_LeftClick(MessageWindow *parent, Button *button, MessageQueue &msgQueue)
 {
 	return BUTTON_CANCEL;
 }

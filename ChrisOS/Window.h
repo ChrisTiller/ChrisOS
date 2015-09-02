@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include <vector>
 #include <SFML/Graphics.hpp>
 
@@ -18,14 +17,6 @@ enum ALIGNMENT
 	BOTTOM_LEFT_ALIGNMENT,
 	BOTTOM_MIDDLE_ALIGNMENT,
 	BOTTOM_RIGHT_ALIGNMENT
-};
-
-class Window;
-
-struct winZOrder
-{
-	int zOrder;
-	Window *window;
 };
 
 class Window : public sf::Drawable, public sf::Transformable
@@ -68,8 +59,6 @@ protected:
 
 	// vector of window pointers that point to child windows if any
 	std::vector<Window*> mChildren;
-	//std::multimap<int, Window*> mZOrderChildren;
-	std::vector<Window*> mZOrderChildren;
 
 private:
 

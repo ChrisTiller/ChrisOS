@@ -7,5 +7,5 @@ class Window;
 class EventHandler
 {
 public:
-	virtual int messageCallBack(Window *window, MessageQueue &messageQueue) = 0;
+	virtual int messageCallBack(Window *parent, Window *child, MessageQueue &messageQueue) = 0;
 };

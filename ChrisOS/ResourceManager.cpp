@@ -20,7 +20,7 @@ sf::Texture& ResourceManager::getTexture(const std::string& textureName)
 	return *mTextureCache.getTexture(mTexturePath + textureName);
 }
 
-sf::Font ResourceManager::getFont(std::string fontName)
+sf::Font& ResourceManager::getFont(std::string fontName)
 {
-	return mFontCache.getFont(mFontPath + fontName);
+	return *mFontCache.getFont(mFontPath + fontName);
 }

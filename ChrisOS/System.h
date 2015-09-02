@@ -21,11 +21,15 @@ public:
 	static std::string getDateTime(const std::string &dateFormat, const std::string &timeFormat);
 	static std::string getVersion();
 
+	void static doEvents();
+
 	void static systemLoop();
 
 	static void draw();
 private:
 	void performTesting();
+
+	static Label dateTime;
 
 	static int mResolutionX;
 	static int mResolutionY;

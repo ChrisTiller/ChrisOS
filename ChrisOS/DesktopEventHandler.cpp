@@ -10,14 +10,14 @@ DesktopEventHandler::~DesktopEventHandler()
 {
 }
 
-int DesktopEventHandler::messageCallBack(Window *window, MessageQueue &messageQueue)
+int DesktopEventHandler::messageCallBack(Window *parent, Window *window, MessageQueue &msgQueue)
 {
 	static int xOffset;
 		static int yOffset;
 		static bool dragStarted;
 	
 		//MessageWindow mBox;
-		while (messageQueue.hasMessage())
+		while (msgQueue.hasMessage())
 		{
 			//switch (messageQueue.getMessage().messageID)
 			//{
@@ -112,15 +112,13 @@ int DesktopEventHandler::messageCallBack(Window *window, MessageQueue &messageQu
 			//default:
 			//	break;
 			//}
-			messageQueue.removeMessage();
+			msgQueue.removeMessage();
 		}
 		return 0;
 }
 
-int DesktopEventHandler::Button_LeftClick(Window *window, MessageQueue &msgQueue)
+int DesktopEventHandler::Button_LeftClick(Window *window, Button *button, MessageQueue &msgQueue)
 {
-	Button *button = (Button*)window;
-
 	button->setText("Please?!");
 	return 0;
 }

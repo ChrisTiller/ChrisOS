@@ -173,7 +173,7 @@ void Window::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	states.transform *= getTransform();
 	target.draw(mBody, states);
 
-	for (int i = 0; i < mZOrderChildren.size(); i++)
+	for (int i = 0; i < mChildren.size(); i++)
 	{
 		mChildren.at(i)->draw(target, states);
 	}
@@ -261,7 +261,7 @@ int Window::events(sf::Event &event, sf::RenderWindow &window)
 
 	if (mEventHandlerClass != nullptr)
 	{
-		return mEventHandlerClass->messageCallBack(this, mWindowMsgQueue);
+		return mEventHandlerClass->messageCallBack(mParent, this, mWindowMsgQueue);
 	}
 	else
 	{

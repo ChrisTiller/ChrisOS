@@ -3,7 +3,7 @@
 
 MessageWindow::MessageWindow(int posX, int posY, int sizeX, int sizeY, std::string title, std::string prompt)
 {
-	setWindowPosition(posX, posY);
+	/*setWindowPosition(posX, posY);
 	setSize(sizeX, sizeY);
 
 	mTitleBar.setWindowPosition(0, 0);
@@ -34,7 +34,7 @@ MessageWindow::MessageWindow(int posX, int posY, int sizeX, int sizeY, std::stri
 	attachWindow(mButtonOK);
 	attachWindow(mButtonCancel);
 
-	mIsOpen = true;
+	mIsOpen = true;*/
 }
 
 MessageWindow::MessageWindow()

@@ -1,73 +1,25 @@
 #include "Window.h"
-#include "System.h"
 
 Window::Window() :
-	mEventHandlerClass(nullptr),
-	mWindowID(0),
-	mNumWindows(0),
-	mBackgroundColor(255, 255, 255, 255),
-	mOutlineColor(0, 0, 0, 255),
-	mBody({ 0.0f, 0.0f }),
-	mSize(0.0f, 0.0f)
+mContainer(nullptr),
+mFocusedWindow(nullptr),
+mMouseOver(false),
+mMouseEnter(false),
+mMouseLeave(false),
+mMouseDown(false),
+mFocused(false),
+mDraggable(false),
+mType(WindowType::WINDOW)
 {
-}
-
-Window::Window(const sf::Vector2f size)
-{
-	setSize(size.x, size.y);
-}
-
-Window::Window(const float x, const float y)
-{
-	setSize(x, y);
-}
-
-Window::Window(const sf::Uint32 windowID, const sf::Vector2f size, EventHandler *eventHandlerClass) :
-	mEventHandlerClass(eventHandlerClass),
-	mWindowID(windowID),
-	mNumWindows(0),
-	mBackgroundColor(255, 255, 255, 255),
-	mOutlineColor(0, 0, 0, 255)
-{
-	setSize(size.x, size.y);
 }
 
 Window::~Window()
 {
-	for (int i = 0; i < mChildren.size(); i++)
-	{
-		//delete mChildren.at(i);
-	}
-
-	mEventHandlerClass = nullptr;
-}
-
-void Window::attachWindow(Window &window)
-{
-	if (window.getWindowID() == 0)
-	{
-		return;
-	}
-	for (int i = 0; i < mChildren.size(); i++)
-	{
-		if (mChildren.at(i)->getWindowID() == window.getWindowID())
-		{
-			return;
-		}
-	}
-
-	window.setParent(*this);
-	if (!window.getEventHandler())
-	{
-		window.setEventHandlerClass(mEventHandlerClass);
-	}
-	mChildren.push_back(&window);
-	mNumWindows++;
 }
 
 sf::Vector2f& Window::getSize()
 {
-	return sf::Vector2f(mSize.x, mSize.y);
+	return mSize;
 }
 
 Window* Window::getParent()
@@ -75,24 +27,14 @@ Window* Window::getParent()
 	return mParent;
 }
 
-sf::Uint32 Window::getWindowID()
-{
-	return mWindowID;
-}
-
-sf::Vector2f Window::getWindowPosition()
+sf::Vector2f Window::getPosition()
 {
 	return sf::Vector2f(mBody.getLocalBounds().left, mBody.getLocalBounds().height);
 }
 
-sf::FloatRect Window::getWindowRect()
-{
-	return sf::FloatRect(getPosition().x, getPosition().y, mSize.x, mSize.y);
-}
-
 EventHandler *Window::getEventHandler()
 {
-	return mEventHandlerClass;
+	return mEventHandler;
 }
 
 void Window::sendMessage(uint controlID, uint message, sf::Event &event)
@@ -106,19 +48,6 @@ void Window::setBackgroundColor(const sf::Uint8 red, const sf::Uint8 green, cons
 	mBody.setFillColor(sf::Color(red, green, blue, alpha));
 }
 
-void Window::setEventHandlerClass(EventHandler *eventHandlerClass)
-{
-	mEventHandlerClass = eventHandlerClass;
-
-	for (int i = 0; i < mChildren.size(); i++)
-	{
-		if (!mChildren.at(i)->getEventHandler())
-		{ 
-			mChildren.at(i)->setEventHandlerClass(eventHandlerClass);
-		}
-	}
-}
-
 void Window::setOutlineColor(const sf::Uint8 red, const sf::Uint8 green, const sf::Uint8 blue, const sf::Uint8 alpha)
 {
 	mOutlineColor = sf::Color(red, green, blue, alpha);
@@ -130,42 +59,24 @@ void Window::setOutlineThickness(float thickness)
 	mBody.setOutlineThickness(thickness);
 }
 
-void Window::setParent(Window &window)
+void Window::setSize(const sf::Vector2f &size)
 {
-	mParent = &window;
+	mSize = size;
+	mBody = sf::RectangleShape(size);
 }
+//
+//void Window::setSize(const float x, const float y)
+//{
+//	sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);
+//	mSize = newSize;
+//	mBody = sf::RectangleShape(newSize);
+//}
 
-void Window::setSize(sf::Vector2f size)
+void Window::setPosition(const float x, const float y)
 {
-	setSize(size.x, size.y);
-}
-
-void Window::setSize(const float x, const float y)
-{
-	sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);
-	mSize = newSize;
-	mBody = sf::RectangleShape(newSize);
-}
-
-void Window::setWindowPosition(const float x, const float y)
-{
-	sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);
+	//sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);
+	sf::Vector2f newSize = sf::Vector2f(x, y);
 	setPosition(newSize.x, newSize.y);
-}
-
-void Window::setWindowID(sf::Uint32 ID)
-{
-	mWindowID = ID;
-}
-
-void Window::setWindowPosition(const sf::Vector2f size)
-{
-	setWindowPosition(size.x, size.y);
-}
-
-void Window::drawMe(sf::RenderTarget &target, sf::RenderStates states) const
-{
-	draw(target, states);
 }
 
 void Window::draw(sf::RenderTarget &target, sf::RenderStates states) const
@@ -173,98 +84,266 @@ void Window::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	states.transform *= getTransform();
 	target.draw(mBody, states);
 
-	for (int i = 0; i < mChildren.size(); i++)
+	for (auto it = mChildren.cbegin(); it != mChildren.cend(); ++it)
 	{
-		mChildren.at(i)->draw(target, states);
+		it->second->draw(target, states);
 	}
 }
 
-int Window::events(sf::Event &event, sf::RenderWindow &window)
+int Window::eventHandle(sf::Event &event)
 {
-	sf::FloatRect body = getWindowRect();
-
-	if (getWindowID() == 0 && mParent != nullptr)
+	Window::Ptr window;
+	switch (event.type)
 	{
-		return 0;
+
+	case sf::Event::MouseMoved:
+
+		for (auto it = mChildren.cbegin(); it != mChildren.cend(); ++it)
+		{
+			if ((it->second->mMouseDown) && ((it->second->mDraggable) || (it->second->mContainer)))
+			{
+				it->second->mouseMoved(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+				return true;
+			}
+		}
+
+		window = mouseOnWhichWindow(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+		if (window != nullptr)
+		{
+			while (window->mType == WindowType::WINDOW && window != nullptr)
+			{
+				window = window->mouseOnWhichWindow(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+			}
+			if (window != nullptr)
+			{
+				window->mouseMoved(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+				return true;
+			}
+		}
+		break;
+
+	case sf::Event::MouseButtonPressed:
+
+		switch (event.mouseButton.button)
+		{
+
+		case sf::Mouse::Left:
+
+			window = mouseOnWhichWindow(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+			if (window != nullptr)
+			{
+				//focusWindow(window.getWindow());
+
+				while (window->mType == WindowType::WINDOW && window != nullptr)
+				{
+					window = window->mouseOnWhichWindow(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+				}
+				if (window != nullptr)
+				{
+					window->leftMousePressed(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+					return true;
+				}
+			}
+			else
+			{
+				//unfocusWindows();
+			}
+
+			break;
+
+		default:
+			return false;
+		}
+		break;
+
+	case sf::Event::MouseButtonReleased:
+
+		switch (event.mouseButton.button)
+		{
+
+		case sf::Mouse::Left:
+
+			window = mouseOnWhichWindow(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+			if (window != nullptr)
+			{
+				while (window->mType == WindowType::WINDOW)
+				{
+					window = window->mouseOnWhichWindow(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+				}
+				if (window != nullptr)
+				{
+					window->leftMousePressed(static_cast<float>(event.mouseMove.x), static_cast<float>(event.mouseMove.y));
+					return true;
+				}
+			}
+
+			for (auto it = mChildren.cbegin(); it != mChildren.cend(); ++it)
+			{
+				if (it->second != window)
+				{
+					it->second->mouseNoLongerDown();
+				}
+			}
+
+			if (window != nullptr)
+			{
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+
+			break;
+		default:
+			return false;
+		}
+		break;
+
+	default:
+		return false;
+	}
+
+	return false;
+}
+
+void Window::initialize(Window *parent)
+{
+	mParent = parent;
+	setEventHandler(mParent->getEventHandler());
+}
+
+void Window::setEventHandler(EventHandler *eventHandler)
+{
+	mEventHandler = eventHandler;
+
+	for (auto it = mChildren.cbegin(); it != mChildren.cend(); ++it)
+	{
+		it->second->setEventHandler(eventHandler);
+	}
+}
+
+void Window::addChildWindow(const Window::Ptr &windowPtr, const std::string &windowName)
+{
+	assert(windowPtr != nullptr);
+
+	if (auto it = mChildren.find(windowName) != mChildren.end()) return;
+
+	windowPtr->initialize(this);
+	mChildren.insert(std::make_pair(windowName, windowPtr));
+}
+
+void Window::mouseMoved(float x, float y)
+{
+	if (!mMouseOver)
+	{
+		mouseEnteredWindow();
+	}
+
+	mMouseOver = true;
+}
+
+bool Window::mouseOnWindow(float x, float y)
+{
+	if (getTransform().transformRect(sf::FloatRect(0, 0, getSize().x, getSize().y)).contains(x, y))
+	{
+		return true;
+	}
+
+	if (mMouseOver)
+	{
+		mouseLeftWindow();
+
+		mMouseOver = false;
+	}
+	return false;
+}
+
+void Window::mouseEnteredWindow()
+{
+	mEventHandler->messageCallBack(mParent, this, MOUSE_ENTER);
+}
+
+void Window::mouseLeftWindow()
+{
+	mEventHandler->messageCallBack(mParent, this, MOUSE_LEAVE);
+}
+
+void Window::leftMousePressed(float x, float y)
+{
+	mMouseDown = true;
+
+	mEventHandler->messageCallBack(mParent, this, LEFT_MOUSE_BUTTON_DOWN);
+}
+
+void Window::leftMouseReleased(float x, float y)
+{
+	mEventHandler->messageCallBack(mParent, this, LEFT_MOUSE_BUTTON_UP);
+
+	if (mMouseDown)
+	{
+		mEventHandler->messageCallBack(mParent, this, LEFT_MOUSE_BUTTON_CLICK);
+
+		mMouseDown = false;
+	}
+}
+
+void Window::windowFocus()
+{
+
+}
+
+void Window::windowUnfocused()
+{
+
+}
+
+void Window::mouseNotOnWindow()
+{
+	if (mMouseOver)
+	{
+		mouseLeftWindow();
 	}
 
 	mMouseOver = false;
-	sf::Vector2f mouseCoords(sf::Mouse::getPosition(System::getWindow()));
-	if (body.contains(mouseCoords))
-	{
-		mMouseOver = true;
-	}
+}
 
-	switch (event.type)
-	{
-	case sf::Event::MouseButtonPressed:
-		if (mMouseOver) {
-			if (event.mouseButton.button == sf::Mouse::Left)
-			{
-				mWindowMsgQueue.addMessage(getWindowID(), LEFT_MOUSE_BUTTON_DOWN, event);
-				mButtonPress = true;
-			}
-		}
-		break;
-	case sf::Event::MouseButtonReleased:
-		if (mButtonPress) {
-			mWindowMsgQueue.addMessage(getWindowID(), LEFT_MOUSE_BUTTON_UP, event);
-			if (mMouseOver) {
-				if (event.mouseButton.button == sf::Mouse::Left)
-				{
-					if (getWindowID() != 0 || mParent != nullptr)
-					{
-						mWindowMsgQueue.addMessage(mWindowID, LEFT_MOUSE_BUTTON_CLICK, event);
-					}
-				}
-			}
-			mButtonPress = false;
-		}
-		break;
-	case sf::Event::MouseMoved:
-		if (mMouseOver)
+void Window::mouseNoLongerDown()
+{
+	for (auto it = mChildren.cbegin(); it != mChildren.cend(); ++it)
+	{	
+		if (it->second->mType == WindowType::WINDOW)
 		{
-			if (!mMouseEnter)
-			{
-				mWindowMsgQueue.addMessage(getWindowID(), MOUSE_ENTER, event);
-				mMouseEnter = true;
-				mMouseLeave = false;
-			}
-			if (mButtonPress)
-			{
-				mWindowMsgQueue.addMessage(getWindowID(), LEFT_MOUSE_BUTTON_DOWN, event);
-			}
-			mWindowMsgQueue.addMessage(getWindowID(), MOUSE_MOVE, event);
+			it->second->mouseNoLongerDown();
 		}
 		else
 		{
-			if (!mMouseLeave)
+			mMouseDown = false;
+		}
+	}
+	mMouseDown = false;
+}
+
+Window::Ptr Window::mouseOnWhichWindow(float x, float y)
+{
+	bool found = false;
+	Window::Ptr window;
+
+	for (auto it = mChildren.crend(); it != mChildren.crbegin(); ++it)
+	{
+		if (!found)
+		{
+			if (it->second->mouseOnWindow(x, y))
 			{
-				mWindowMsgQueue.addMessage(getWindowID(), MOUSE_LEAVE, event);
-				mMouseLeave = true;
-				mMouseEnter = false;
-			}
-			if (mButtonPress)
-			{
-				mWindowMsgQueue.addMessage(getWindowID(), LEFT_MOUSE_BUTTON_DOWN, event);
+				window = it->second;
+				found = true;
 			}
 		}
-		break;
-	default:
-		break;
+		else
+		{
+			it->second->mouseNotOnWindow();
+		}
 	}
 
-	for (int i = mChildren.size() - 1; i >= 0; i--)
-	{
-		mChildren.at(i)->events(event, window);
-	}
-
-	if (mEventHandlerClass != nullptr)
-	{
-		return mEventHandlerClass->messageCallBack(mParent, this, mWindowMsgQueue);
-	}
-	else
-	{
-		return 0;
-	}
+	return window;
 }

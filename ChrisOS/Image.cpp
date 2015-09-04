@@ -1,5 +1,4 @@
 #include "Image.h"
-#include "System.h"
 
 std::string Image::ImageDir = "Resources\\Images\\";
 
@@ -58,8 +57,8 @@ void Image::setImagePosition(sf::Vector2f position)
 
 void Image::setImagePosition(const float x, const float y)
 {
-	sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);
-	mImage.setPosition(newSize.x, newSize.y);
+	////sf::Vector2f newSize = sf::Vector2f(x / System::getInternalResolution().x * System::getWindow().getSize().x, y / System::getInternalResolution().y * System::getWindow().getSize().y);
+	//mImage.setPosition(newSize.x, newSize.y);
 }
 
 void Image::draw(sf::RenderTarget &target, sf::RenderStates states) const

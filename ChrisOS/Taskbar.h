@@ -23,5 +23,8 @@ private:
 	Button mPowerButton;
 
 	TaskbarEventHandler mEventHandler;
+
+
+	friend class Window;
 };
 

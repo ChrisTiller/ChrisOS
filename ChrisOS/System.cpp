@@ -239,13 +239,12 @@ void System::systemLoop()
 	dp = dp->getInstance();
 
 	//dp->setBackground("background-hd-wallpapers.jpg", 1920, 1080);
-	dp->setWindowPosition(0, 0);
+	dp->setPosition(0, 0);
 	dp->setSize(1920, 1080);
 	dp->setBackgroundColor(0, 0, 180, 200);
 
 	DesktopEventHandler dpHandle;
 
-	dp->setEventHandlerClass(&dpHandle);
 
 	Taskbar tskbar;
 
@@ -253,23 +252,20 @@ void System::systemLoop()
 	tskbar.setPosition(0, 0);
 	tskbar.setSize(1920, 33);
 	tskbar.setBackgroundColor(255, 255, 255);
-	tskbar.setEventHandlerClass(&eventHandler);
 
 	Button mPowerButton;
 	mPowerButton.setSize(25.0f, 25.0f);
 	mPowerButton.setImage("power-off.png", 16, 16);
-	mPowerButton.setWindowID(POWER_BUTTON);
 	mPowerButton.setImageAlignment(MIDDLE_MIDDLE_ALIGNMENT);
 
 	//dateTime(System::getDateTime("mm/dd/yy", "hh:mm"));
 	dateTime.setSize(50.0f, 29.0f);
 	dateTime.setFontSize(28.0f);
 
-	dateTime.setWindowID(DATE_TIME);
-	tskbar.attachWindow(dateTime);
-	dateTime.setWindowPosition((tskbar.getSize().x / 2) - (dateTime.getTextLength() / 2), 2);
+	tskbar.addChildWindow(dateTime);
+	dateTime.setPosition((tskbar.getSize().x / 2) - (dateTime.getTextLength() / 2), 2);
 
-	tskbar.attachWindow(mPowerButton);
+	/*tskbar.attachWindow(mPowerButton);
 	mPowerButton.setWindowPosition(1890.0f, 4.5f);
 
 	tskbar.setWindowID(1);
@@ -285,7 +281,7 @@ void System::systemLoop()
 	dp->attachWindow(versionLabel);
 
 	versionLabel.setWindowPosition(1790, 1050);
-
+*/
 	while (mWindow.isOpen())
 	{
 		doEvents();
@@ -316,7 +312,7 @@ void System::doEvents()
 				break;
 			}
 		}
-		dp->events(event, mWindow);
+		dp->eventHandle(event);
 	}
 
 	draw();

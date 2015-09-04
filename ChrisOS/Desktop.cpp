@@ -28,8 +28,8 @@ void Desktop::draw(sf::RenderTarget &target, sf::RenderStates states) const
 	
 	mBackground.draw(target, states);
 
-	for (int i = 0; i < mChildren.size(); i++)
+	for (auto it = mChildren.cbegin(); it != mChildren.cend(); ++it)
 	{
-		mChildren.at(i)->drawMe(target, states);
+		it->second->draw(target, states);
 	}
 }

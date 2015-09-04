@@ -73,15 +73,12 @@ int TaskbarEventHandler::PowerButton_LeftClick(Window *parent, Button *button, M
 
 	MessageWindow winMsg(500, 500, 500, 500, "Hi", "Test");
 
-	winMsg.setWindowID(100);
 
 	MessageWindowHandler handle;
 
-	winMsg.setEventHandlerClass(&handle);
 
 	Desktop *dp = dp->getInstance();
 
-	dp->attachWindow(winMsg);
 
 	while (winMsg.isOpen())
 	{

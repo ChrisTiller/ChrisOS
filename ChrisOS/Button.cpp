@@ -25,7 +25,7 @@ void Button::setFont(const std::string fontName, const float fontSize)
 void Button::setImage(const std::string imageName, const float sizeX, const float sizeY)
 {
 	mImage.setImage(imageName, sizeX, sizeY);
-	attachWindow(mImage);
+	//attachWindow(mImage);
 }
 
 void Button::setImageAlignment(sf::Uint32 alignment)

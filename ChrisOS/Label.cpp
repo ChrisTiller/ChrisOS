@@ -1,5 +1,4 @@
 #include "Label.h"
-#include "System.h"
 
 Label::Label(const std::string text, const std::string font, const float fontSize, sf::Uint32 alignment) :
 mAlignment(alignment)
@@ -63,8 +62,8 @@ void Label::setText(const std::string text)
 
 void Label::setFontSize(float size)
 {
-	float newSize = size / System::getInternalResolution().y * System::getWindow().getSize().y;
-	mText.setCharacterSize(newSize);
+	/*float newSize = size / System::getInternalResolution().y * System::getWindow().getSize().y;
+	mText.setCharacterSize(newSize);*/
 }
 
 void Label::draw(sf::RenderTarget &target, sf::RenderStates states) const

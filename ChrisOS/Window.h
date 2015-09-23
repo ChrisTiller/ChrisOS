@@ -6,7 +6,9 @@
 
 #include "EventHandler.h"
 #include "ResourceManager.h"
+
 #include "SharedWindowPtr.h"
+#include "SharedWindowPtr.inl"
 
 enum ALIGNMENT
 {
@@ -35,7 +37,13 @@ class Window : public sf::Drawable, public sf::Transformable
 {
 public:
 
+	/*struct Ptr
+	{
+		typedef SharedWindowPtr<Window> PTR;
+	};*/
+	//using Ptr = SharedWindowPtr<Window>;
 	typedef SharedWindowPtr<Window> Ptr;
+	//SharedWindowPtr<Window> Ptr;
 
 	Window();
 	/*Window(const sf::Vector2f size);
@@ -51,7 +59,7 @@ public:
 
 	EventHandler *getEventHandler();
 
-	void addChildWindow(const Window::Ptr &windowPtr, const std::string &windowName = "");
+	void addChildWindow(const ::Window::Ptr &windowPtr, const std::string &windowName = "");
 
 	void sendMessage(uint controlID, uint message, sf::Event &event);
 
@@ -98,13 +106,13 @@ protected:
 	sf::RectangleShape mBody;
 
 	// vector of window pointers that point to child windows if any
-	std::map<std::string, Window::Ptr> mChildren;
+	std::map<std::string, Ptr> mChildren;
 
 	virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const;
 
 private:
 
-	Window::Ptr mouseOnWhichWindow(float x, float y);
+	::Window::Ptr mouseOnWhichWindow(float x, float y);
 
 	void initialize(Window *parent);
 

@@ -48,3 +48,8 @@ Temporary Items
 *.log
 *.exe
 Debug/ChrisOS.ilk
+*.log
+ChrisOS.sdf
+*.exe
+Debug/ChrisOS.ilk
+*.pdb

@@ -92,7 +92,7 @@ void Window::draw(sf::RenderTarget &target, sf::RenderStates states) const
 
 int Window::eventHandle(sf::Event &event)
 {
-	Window::Ptr window;
+	Ptr window;
 	switch (event.type)
 	{
 

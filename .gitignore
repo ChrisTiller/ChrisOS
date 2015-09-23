@@ -53,3 +53,6 @@ ChrisOS.sdf
 *.exe
 Debug/ChrisOS.ilk
 *.pdb
+*.suo
+ChrisOS/Debug/ChrisOS.Build.CppClean.log
+*.exe

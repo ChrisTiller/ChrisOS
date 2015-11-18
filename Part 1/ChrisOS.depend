@@ -1,0 +1,90 @@
+# depslib dependency file v1.0
+1444178150 source:/home/chris/Documents/Git/ChrisOS/ChrisOS/ChrisOS/main.cpp
+	<ncurses.h>
+
+1444533124 source:/home/chris/Documents/Code Blocks/ChrisOS/src/main.cpp
+	"../include/system.h"
+
+1446484319 source:/home/chris/Documents/Code Blocks/ChrisOS/src/system.cpp
+	"../include/system.h"
+
+1446501268 /home/chris/Documents/Code Blocks/ChrisOS/include/system.h
+	<cstdlib>
+	<ctime>
+	<string>
+	<map>
+	<curses.h>
+	"io.h"
+	"command.h"
+
+1444400349 source:/home/chris/Documents/Code Blocks/ChrisOS/src/output.cpp
+	"../include/output.h"
+
+1444401291 /home/chris/Documents/Code Blocks/ChrisOS/include/output.h
+	<iostream>
+
+1444400325 source:/home/chris/Documents/Code Blocks/ChrisOS/src/input.cpp
+	"../include/input.h"
+
+1444400250 /home/chris/Documents/Code Blocks/ChrisOS/include/input.h
+	<iostream>
+	"output.h"
+
+1444656601 /home/chris/Documents/Code Blocks/ChrisOS/include/io.h
+	<iostream>
+
+1444656591 source:/home/chris/Documents/Code Blocks/ChrisOS/src/io.cpp
+	"../include/io.h"
+
+1444536991 source:/home/chris/Documents/Code Blocks/ChrisOS/command.cpp
+	"../include/command.h"
+
+1444535107 /home/chris/Documents/Code Blocks/ChrisOS/include/command.h
+	<vector>
+	<string>
+	<sstream>
+
+1444536991 source:/home/chris/Documents/Code Blocks/ChrisOS/src/command.cpp
+	"../include/command.h"
+
+1444411218 source:/home/chris/Documents/Code Blocks/ChrisOS/src/LinkedList.cpp
+	"../include/LinkedList.h"
+
+1444411150 /home/chris/Documents/Code Blocks/ChrisOS/include/LinkedList.h
+	<iostream>
+	"Node.h"
+
+1444676083 /home/chris/Documents/Code Blocks/ChrisOS/include/Node.h
+
+1444410426 source:/home/chris/Documents/Code Blocks/ChrisOS/src/Node.cpp
+	"Node.h"
+
+1446486667 source:/home/chris/Documents/Code Blocks/ChrisOS/Part 1/src/command.cpp
+	"../include/command.h"
+
+1444535107 /home/chris/Documents/Code Blocks/ChrisOS/Part 1/include/command.h
+	<vector>
+	<string>
+	<sstream>
+
+1444656591 source:/home/chris/Documents/Code Blocks/ChrisOS/Part 1/src/io.cpp
+	"../include/io.h"
+
+1444656601 /home/chris/Documents/Code Blocks/ChrisOS/Part 1/include/io.h
+	<iostream>
+
+1444533124 source:/home/chris/Documents/Code Blocks/ChrisOS/Part 1/src/main.cpp
+	"../include/system.h"
+
+1446501268 /home/chris/Documents/Code Blocks/ChrisOS/Part 1/include/system.h
+	<cstdlib>
+	<ctime>
+	<string>
+	<map>
+	<curses.h>
+	"io.h"
+	"command.h"
+
+1446501383 source:/home/chris/Documents/Code Blocks/ChrisOS/Part 1/src/system.cpp
+	"../include/system.h"
+

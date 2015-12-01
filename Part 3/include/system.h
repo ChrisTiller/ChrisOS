@@ -39,6 +39,8 @@ public:
     void showReady(const vector<string>& params);
     void showBlocked(const vector<string>& params);
 
+    void SJF(const vector<string>& params);
+
     void getDateTime(const vector<string>& params);
     void getTime(const vector<string>& params);
     void getDate(const vector<string>& params);

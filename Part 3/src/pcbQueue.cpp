@@ -13,6 +13,12 @@ pcbQueue::pcbQueue() : numPCBs(0) {
 
 pcbQueue::~pcbQueue() {
 
+    if (numPCBs == 0) {
+        delete mHead;
+        delete mTail;
+        return;
+    }
+
     PCB* curr = mHead->getNext();
     PCB* toDelete;
 
@@ -64,8 +70,8 @@ void pcbQueue::push_back(PCB* pcb) {
 
     assert(pcb != NULL);
 
-    mTail->getPrev()->setNext(pcb);
     pcb->setPrev(mTail->getPrev());
+    mTail->getPrev()->setNext(pcb);
     mTail->setPrev(pcb);
     pcb->setNext(mTail);
 

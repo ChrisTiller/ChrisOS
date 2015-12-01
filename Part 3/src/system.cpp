@@ -1,5 +1,11 @@
 #include "../include/system.h"
 #include <cassert>
+#include <fstream>
+#include <sstream>
+#include <cstdlib>
+
+using std::stringstream;
+using std::ifstream;
 
 System* System::mInstance = NULL;
 
@@ -64,6 +70,7 @@ void System::loadSystemFunctions() {
     systemFunctions.insert(std::make_pair("showAll", &System::showAll));
     systemFunctions.insert(std::make_pair("showReady", &System::showReady));
     systemFunctions.insert(std::make_pair("showBlocked", &System::showBlocked));
+    systemFunctions.insert(std::make_pair("SJF", &System::SJF));
 }
 
 bool System::findCommand(Command& command) {
@@ -857,4 +864,68 @@ void System::showBlocked(const vector<string>& params) {
      for (int i = 0; i < mWidth; i++) {
         IO::print("*");
     }
+}
+
+void System::SJF(const vector<string>& params) {
+
+    if (params.size() != 1) {
+        IO::println("SJF takes only one parameter");
+        return;
+    }
+
+    ifstream file;
+
+    file.open(params.at(0), std::ios_base::in);
+
+    if (file.fail()) {
+        IO::println("File failed to open");
+        return;
+    }
+
+    vector<string> tokens;
+    string line;
+    pcbQueue bufferQueue;
+
+
+    while (std::getline(file, line)) {
+
+        stringstream ss(line);
+        string token;
+        while (getline(ss, token, ' ')) {
+            tokens.push_back(token);
+        }
+
+        PCB* pcb;
+
+        if (tokens.at(1) == "A") {
+            pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), APPLICATION);
+        } else {
+            pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), SYSTEM);
+        }
+
+        pcb->setMemory(atoi(tokens.at(3).c_str()));
+        pcb->setTimeRemaining(atoi(tokens.at(4).c_str()));
+
+        bufferQueue.push_back(pcb);
+
+    }
+
+    file.close();
+
+    PCB* lowestTimeRemaining;
+
+    while (bufferQueue.numPCB() > 0) {
+
+        lowestTimeRemaining = bufferQueue.cbegin();
+
+        for (PCB* pcb2 = bufferQueue.cbegin(); pcb2 != bufferQueue.cend(); pcb2 = pcb2->getNext()) {
+            if (pcb2->getTimeRemaining() < lowestTimeRemaining->getTimeRemaining()) {
+                lowestTimeRemaining = pcb2;
+            }
+        }
+
+        bufferQueue.remove(lowestTimeRemaining);
+        mReadyQueue.push_back(lowestTimeRemaining);
+    }
+
 }

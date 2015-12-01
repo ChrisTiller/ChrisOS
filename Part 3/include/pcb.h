@@ -32,7 +32,8 @@ public:
         mProcessClass(SYSTEM),
         mProcessPriority(0),
         mProcessState(READY),
-        mProcessMemory(0)
+        mProcessMemory(0),
+        mTimeRemaining(0)
     {}
     PCB(string name, PROCESS_CLASS processClass, int processPriority);
 
@@ -54,10 +55,14 @@ public:
     STATE getState() { return mProcessState; }
     void setState(STATE state) { mProcessState = state; }
 
+    void setMemory(int memory) { mProcessMemory = memory; }
     int getMemory() { return mProcessMemory; }
 
     void setSuspend(bool suspend) { mSuspend = suspend; }
     bool getSuspend() { return mSuspend; }
+
+    void setTimeRemaining(int timeRemaining) { mTimeRemaining = timeRemaining; }
+    bool getTimeRemaining() { return mTimeRemaining; }
 
 private:
     string mProcessName;
@@ -66,6 +71,7 @@ private:
     STATE mProcessState;
     int mProcessMemory;
     bool mSuspend;
+    int mTimeRemaining;
 
     PCB* mNext;
     PCB* mPrev;

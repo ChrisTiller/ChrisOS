@@ -887,6 +887,89 @@ void System::SJF(const vector<string>& params) {
     pcbQueue bufferQueue;
 
 
+    // we first read in the contents of the file.
+    // since this is a full knowledge scheduler, we read the entire file before insertions to the ready queue
+    while (std::getline(file, line)) {
+
+        // break each line into tokens
+        stringstream ss(line);
+        string token;
+        while (getline(ss, token, ' ')) {
+            tokens.push_back(token);
+        }
+
+        PCB* pcb;
+
+        // tokens.at(0) is the process name
+        // tokens.at(1) is the process class
+        // tokens.at(2) is the process priority
+        // tokens.at(3) is the memory
+        // tokens.at(4) is the time remaining
+        if (tokens.at(1) == "A") {
+            pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), APPLICATION);
+        } else {
+            pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), SYSTEM);
+        }
+
+        pcb->setMemory(atoi(tokens.at(3).c_str()));
+        pcb->setTimeRemaining(atoi(tokens.at(4).c_str()));
+
+        bufferQueue.push_back(pcb);
+
+        tokens.clear();
+
+    }
+
+    file.close();
+
+    PCB* lowestTimeRemaining;
+
+    // we then look through our buffer queue to find the process with the lowest time remaining.
+    // once we find it, remove it from the buffer queue and place into the ready queue
+    // repeat until buffer queue is empty
+    while (bufferQueue.numPCB() > 0) {
+
+        lowestTimeRemaining = bufferQueue.cbegin();
+
+        for (PCB* pcb2 = bufferQueue.cbegin(); pcb2 != bufferQueue.cend(); pcb2 = pcb2->getNext()) {
+            if (((int)pcb2->getTimeRemaining()) < ((int)lowestTimeRemaining->getTimeRemaining())) {
+                lowestTimeRemaining = pcb2;
+            }
+        }
+
+        bufferQueue.remove(lowestTimeRemaining);
+        mReadyQueue.push_back(lowestTimeRemaining);
+    }
+
+    showReady(vector<string>());
+
+    while (mReadyQueue.numPCB() > 0) {
+        PCB* frontPCB = mReadyQueue.pop_front();
+        IO::println(frontPCB->getName());
+    }
+
+}
+
+void System::FIFO(const vector<string>& params) {
+
+    if (params.size() != 1) {
+        IO::println("FIFO takes only one parameter");
+        return;
+    }
+
+     ifstream file;
+
+    file.open(params.at(0), std::ios_base::in);
+
+    if (file.fail()) {
+        IO::println("File failed to open");
+        return;
+    }
+
+    vector<string> tokens;
+    string line;
+
+    // since this is FIFO and the input file is already sorted by time of arrival, we can skip a buffer queue
     while (std::getline(file, line)) {
 
         stringstream ss(line);
@@ -906,26 +989,12 @@ void System::SJF(const vector<string>& params) {
         pcb->setMemory(atoi(tokens.at(3).c_str()));
         pcb->setTimeRemaining(atoi(tokens.at(4).c_str()));
 
-        bufferQueue.push_back(pcb);
+        mReadyQueue.push_back(pcb);
+
+        tokens.clear();
 
     }
 
     file.close();
-
-    PCB* lowestTimeRemaining;
-
-    while (bufferQueue.numPCB() > 0) {
-
-        lowestTimeRemaining = bufferQueue.cbegin();
-
-        for (PCB* pcb2 = bufferQueue.cbegin(); pcb2 != bufferQueue.cend(); pcb2 = pcb2->getNext()) {
-            if (pcb2->getTimeRemaining() < lowestTimeRemaining->getTimeRemaining()) {
-                lowestTimeRemaining = pcb2;
-            }
-        }
-
-        bufferQueue.remove(lowestTimeRemaining);
-        mReadyQueue.push_back(lowestTimeRemaining);
-    }
 
 }

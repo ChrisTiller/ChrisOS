@@ -40,6 +40,11 @@ public:
     void showBlocked(const vector<string>& params);
 
     void SJF(const vector<string>& params);
+    void FIFO(const vector<string>& params);
+    void STCF(const vector<string>& params);
+    void FPPS(const vector<string>& params);
+    void RR(const vector<string>& params);
+    void MLFQ(const vector<string>& params);
 
     void getDateTime(const vector<string>& params);
     void getTime(const vector<string>& params);

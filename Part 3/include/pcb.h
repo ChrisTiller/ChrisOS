@@ -62,7 +62,7 @@ public:
     bool getSuspend() { return mSuspend; }
 
     void setTimeRemaining(int timeRemaining) { mTimeRemaining = timeRemaining; }
-    bool getTimeRemaining() { return mTimeRemaining; }
+    int getTimeRemaining() { return mTimeRemaining; }
 
 private:
     string mProcessName;

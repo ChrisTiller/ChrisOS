@@ -1,0 +1,263 @@
+*************************************************************
+*
+*Documentation for the System Class
+*
+*
+*OVERVIEW: The system class, as the name would imply, is the
+*meat of the operating system which handles the upper level
+*functions the user might request and hanldes process
+*scheduling.
+*
+*************************************************************
+
+*************************************************************
+*CLASS DEFINITION
+*************************************************************
+*************************************************************
+*FUNCTIONS:
+*************************************************************
+
+	function name: alias
+
+	function purpose: to alias a system command with a
+			  name given by the user to which
+			  then can be used by the user to
+			  call the system command
+
+	function prototype: 
+		
+		void System::alias(const vector<string>& params)
+
+	function parameter(s):
+		
+		params - a const string vector which contains
+			 the user provided parameters
+****************************************************************	
+
+	function name: close
+
+	function purpose: to exit the program
+
+	function prototype: 
+		
+		void System::close()
+
+	function parameter(s): none
+****************************************************************
+
+	function name: init
+
+	function purpose: used for ouputing a welcome message
+			  followed by a help message to get
+			  the user started
+
+	function prototype: 
+		
+		void System::init()
+
+	function parameter(s): none
+*****************************************************************
+
+	function name: loadSystemFunctions
+
+	function purpose: to pair command names with their function
+			  counter parts and add them to a map
+			  which will be later used for executing
+			  a command the user wants
+
+	function prototype: 
+		
+		void System::loadSystemFuntions()
+
+	function parameter(s): none
+******************************************************************
+
+	function name: findCommand
+
+	function purpose: given a user input command, it looks through
+   			  all the aliases to determine which command
+			  the system needs to execute then tries to
+			  find it. If found, the function will return
+			  true.
+
+	function prototype: 
+		
+		bool System::findCommand(Command& command)
+
+	function parameter(s):
+		
+		command - the command that the user generates
+*******************************************************************
+
+	function name: getDate
+
+	function purpose: prints the current date in a user
+			  specified format
+
+	function prototype: 
+		
+		void System::getDate(const vector<string>& params)
+
+	function parameter(s):
+		
+		params - a const string vector which contains
+			 the format the user wished to use
+********************************************************************
+
+	function name: getDateTime
+
+	function purpose: prints the current date and time in a user
+			  specified format
+
+	function prototype: 
+		
+		void System::getDateTime(const vector<string>& params)
+
+	function parameter(s):
+		
+		params - a const string vector which contains
+			 the format of the date the user wished to use
+      			 followed by the format of the time
+********************************************************************
+
+	function name: getInstance
+
+	function purpose: returns the only instance of the system
+			  object that is available to use in the
+			  program
+
+	function prototype: 
+		
+		System* System::getInstance()
+
+	function parameter(s): none
+********************************************************************
+
+	function name: getTime
+
+	function purpose: prints the time in a user specified format
+
+	function prototype: 
+		
+		void System::getTime(const vector<string>& params)
+
+	function parameter(s): 
+
+		params - a const string vector that contains the format
+			 of the time the time
+********************************************************************
+
+	function name: getVersion
+
+	function purpose: prints the current version of the operating system
+
+	function prototype: 
+		
+		void System::getVerion(const vector<string>& params)
+
+	function parameter(s): 
+
+		params - not used (byproduct of using function pointers)
+********************************************************************
+
+	function name: help
+
+	function purpose: prints a list of all available commands
+
+	function prototype: 
+		
+		void System::help(const vector<string>& params)
+
+	function parameter(s): 
+
+		params - not used
+********************************************************************
+
+	function name: System
+
+	function purpose: the constructor which uses the ncurses
+			  library to determine the width and height
+			  of the screen and calls loadSystemFunctions()
+
+	function prototype: 
+		
+		void System::systemLoop()
+
+	function parameter(s): none
+********************************************************************
+	function name: sytemLoop
+
+	function purpose: the main loop for the simulation which
+			  gets gets the user command and executes
+			  them
+
+	function prototype: 
+		
+		void System::systemLoop()
+
+	function parameter(s): none
+********************************************************************
+
+********************************************************************
+*MEMBER VARIABLES
+********************************************************************
+
+	name: mInstance
+	
+	purpose: used to hold the only instance of the object that
+		 can be created
+
+	declaration:
+	
+		System* mInstance
+********************************************************************
+
+	name: mWidth
+	
+	purpose: holds the width of the screen
+
+	declaration:
+	
+		int mWidth
+********************************************************************
+
+	name: mHeight
+	
+	purpose: holds the height of the screen
+
+	declaration:
+	
+		int mHeight
+********************************************************************
+
+	name: systemFunction
+	
+	purpose: a function pointer to represent a generic form for
+		 member functions of System so that they can be easily
+		 grouped together
+
+	declaration:
+	
+		typedef void (System::*systemFunction)(const vector<string>&);
+********************************************************************
+
+	name: systemFunctions
+	
+	purpose: a map whose key is a string representing the name of
+		 a function which is then paired with a systemFunction
+
+	declaration:
+	
+		map<string, systemFunction> systemFunctions;
+********************************************************************
+
+	name: aliasCommands
+	
+	purpose: a map whose key is a string representing the aliased
+		 command name which is mapped to the name of the 
+		 system command the user aliased it to
+
+	declaration:
+	
+		map<string, string> aliasCommands;
+********************************************************************

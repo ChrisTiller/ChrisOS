@@ -33,7 +33,8 @@ public:
         mProcessPriority(0),
         mProcessState(READY),
         mProcessMemory(0),
-        mTimeRemaining(0)
+        mTimeRemaining(0),
+        mArrivalTime(0)
     {}
     PCB(string name, PROCESS_CLASS processClass, int processPriority);
 
@@ -64,6 +65,9 @@ public:
     void setTimeRemaining(int timeRemaining) { mTimeRemaining = timeRemaining; }
     int getTimeRemaining() { return mTimeRemaining; }
 
+    void setArrivalTime(int arrivalTime) { mArrivalTime = arrivalTime; }
+    int getArrivalTime() { return mArrivalTime; }
+
 private:
     string mProcessName;
     PROCESS_CLASS mProcessClass;
@@ -72,6 +76,7 @@ private:
     int mProcessMemory;
     bool mSuspend;
     int mTimeRemaining;
+    int mArrivalTime;
 
     PCB* mNext;
     PCB* mPrev;

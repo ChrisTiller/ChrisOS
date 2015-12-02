@@ -6,6 +6,7 @@
 
 using std::stringstream;
 using std::ifstream;
+using std::ofstream;
 
 System* System::mInstance = NULL;
 
@@ -71,6 +72,7 @@ void System::loadSystemFunctions() {
     systemFunctions.insert(std::make_pair("showReady", &System::showReady));
     systemFunctions.insert(std::make_pair("showBlocked", &System::showBlocked));
     systemFunctions.insert(std::make_pair("SJF", &System::SJF));
+    systemFunctions.insert(std::make_pair("FIFO", &System::FIFO));
 }
 
 bool System::findCommand(Command& command) {
@@ -686,7 +688,7 @@ void System::showAll(const vector<string>& params) {
 
     if (mReadyQueue.numPCB() > 0) {
 
-        for (PCB* pcb = mReadyQueue.cbegin(); pcb != mReadyQueue.cend(); pcb = pcb->getNext()) {
+        for (PCB* pcb = mReadyQueue.begin(); pcb != mReadyQueue.end(); pcb = pcb->getNext()) {
             displayPCBInfo(pcb);
 
             currLineNo++;
@@ -706,7 +708,7 @@ void System::showAll(const vector<string>& params) {
 
     if (mBlockedQueue.numPCB() > 0) {
 
-        for (PCB* pcb = mBlockedQueue.cbegin(); pcb != mBlockedQueue.cend(); pcb = pcb->getNext()) {
+        for (PCB* pcb = mBlockedQueue.begin(); pcb != mBlockedQueue.end(); pcb = pcb->getNext()) {
             displayPCBInfo(pcb);
 
             currLineNo++;
@@ -801,7 +803,7 @@ void System::showReady(const vector<string>& params) {
 
     int currLineNo = 3;
 
-    for (PCB* pcb = mReadyQueue.cbegin(); pcb != mReadyQueue.cend(); pcb = pcb->getNext()) {
+    for (PCB* pcb = mReadyQueue.begin(); pcb != mReadyQueue.end(); pcb = pcb->getNext()) {
         displayPCBInfo(pcb);
 
         currLineNo++;
@@ -844,7 +846,7 @@ void System::showBlocked(const vector<string>& params) {
 
     int currLineNo = 3;
 
-    for (PCB* pcb = mBlockedQueue.cbegin(); pcb != mBlockedQueue.cend(); pcb = pcb->getNext()) {
+    for (PCB* pcb = mBlockedQueue.begin(); pcb != mBlockedQueue.end(); pcb = pcb->getNext()) {
         displayPCBInfo(pcb);
 
         currLineNo++;
@@ -873,54 +875,9 @@ void System::SJF(const vector<string>& params) {
         return;
     }
 
-    ifstream file;
-
-    file.open(params.at(0), std::ios_base::in);
-
-    if (file.fail()) {
-        IO::println("File failed to open");
-        return;
-    }
-
-    vector<string> tokens;
-    string line;
     pcbQueue bufferQueue;
 
-
-    // we first read in the contents of the file.
-    // since this is a full knowledge scheduler, we read the entire file before insertions to the ready queue
-    while (std::getline(file, line)) {
-
-        // break each line into tokens
-        stringstream ss(line);
-        string token;
-        while (getline(ss, token, ' ')) {
-            tokens.push_back(token);
-        }
-
-        PCB* pcb;
-
-        // tokens.at(0) is the process name
-        // tokens.at(1) is the process class
-        // tokens.at(2) is the process priority
-        // tokens.at(3) is the memory
-        // tokens.at(4) is the time remaining
-        if (tokens.at(1) == "A") {
-            pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), APPLICATION);
-        } else {
-            pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), SYSTEM);
-        }
-
-        pcb->setMemory(atoi(tokens.at(3).c_str()));
-        pcb->setTimeRemaining(atoi(tokens.at(4).c_str()));
-
-        bufferQueue.push_back(pcb);
-
-        tokens.clear();
-
-    }
-
-    file.close();
+    loadJobs(params, bufferQueue);
 
     PCB* lowestTimeRemaining;
 
@@ -946,6 +903,7 @@ void System::SJF(const vector<string>& params) {
     while (mReadyQueue.numPCB() > 0) {
         PCB* frontPCB = mReadyQueue.pop_front();
         IO::println(frontPCB->getName());
+        freePCB(frontPCB);
     }
 
 }
@@ -957,9 +915,50 @@ void System::FIFO(const vector<string>& params) {
         return;
     }
 
-     ifstream file;
+    pcbQueue bufferQueue;
 
-    file.open(params.at(0), std::ios_base::in);
+    loadJobs(params, bufferQueue);
+
+    int currentCycle = 0;
+
+    while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
+
+        if (!bufferQueue.isEmpty()) {
+            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+                PCB* pcb = bufferQueue.pop_front();
+
+                mReadyQueue.push_back(pcb);
+
+                displayQueueInfo("FIFO.txt", "New Process added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle));
+            }
+        }
+
+        currentCycle++;
+
+        if (!mReadyQueue.isEmpty()) {
+            mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
+
+            if (mReadyQueue.begin()->getTimeRemaining() == 0) {
+                PCB* pcb = mReadyQueue.pop_front();
+
+                IO::println(pcb->getName());
+
+                displayQueueInfo("FIFO.txt", "Process finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle));
+
+                freePCB(pcb);
+            }
+        }
+    }
+
+}
+
+void System::loadJobs(const vector<string>& params, pcbQueue& jobQueue) {
+
+    ifstream file;
+
+    if (!file.is_open()) {
+        file.open(params.at(0), std::ios_base::in);
+    }
 
     if (file.fail()) {
         IO::println("File failed to open");
@@ -969,9 +968,12 @@ void System::FIFO(const vector<string>& params) {
     vector<string> tokens;
     string line;
 
-    // since this is FIFO and the input file is already sorted by time of arrival, we can skip a buffer queue
+
+    // we first read in the contents of the file.
+    // since this is a full knowledge scheduler, we read the entire file before insertions to the ready queue
     while (std::getline(file, line)) {
 
+        // break each line into tokens
         stringstream ss(line);
         string token;
         while (getline(ss, token, ' ')) {
@@ -980,6 +982,12 @@ void System::FIFO(const vector<string>& params) {
 
         PCB* pcb;
 
+        // tokens.at(0) is the process name
+        // tokens.at(1) is the process class
+        // tokens.at(2) is the process priority
+        // tokens.at(3) is the memory
+        // tokens.at(4) is the time remaining
+        // tokens.at(5) is the time of arrival
         if (tokens.at(1) == "A") {
             pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), APPLICATION);
         } else {
@@ -988,13 +996,197 @@ void System::FIFO(const vector<string>& params) {
 
         pcb->setMemory(atoi(tokens.at(3).c_str()));
         pcb->setTimeRemaining(atoi(tokens.at(4).c_str()));
+        pcb->setArrivalTime(atoi(tokens.at(5).c_str()));
 
-        mReadyQueue.push_back(pcb);
+        jobQueue.push_back(pcb);
 
         tokens.clear();
 
     }
 
     file.close();
+
+}
+
+void System::STCF(const vector<string>& params) {
+
+    if (params.size() != 1) {
+        IO::println("FIFO takes only one parameter");
+        return;
+    }
+
+    pcbQueue bufferQueue;
+
+    loadJobs(params, bufferQueue);
+
+    int currentCycle = 0;
+
+    while (!bufferQueue.isEmpty() && !mReadyQueue.isEmpty()) {
+
+        if (!bufferQueue.isEmpty()) {
+            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+                PCB* pcb = bufferQueue.pop_front();
+
+                mReadyQueue.push_back(pcb);
+
+                displayQueueInfo("STCF.txt", "New PCB added: " + pcb->getName());
+
+                for (PCB* pcb = mReadyQueue.begin(); pcb != mReadyQueue.end(); pcb = pcb->getNext()) {
+                    if (pcb->getTimeRemaining() < mReadyQueue.begin()->getTimeRemaining()) {
+                        PCB* kickout = mReadyQueue.pop_front();
+                        mReadyQueue.push_back(kickout);
+                        pcb = mReadyQueue.end();
+                    }
+                }
+            }
+        }
+
+        if (!mReadyQueue.isEmpty()) {
+
+
+
+            mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
+
+            if (mReadyQueue.begin()->getTimeRemaining() == 0) {
+                PCB* pcb = mReadyQueue.pop_front();
+
+                IO::println(pcb->getName());
+
+                freePCB(pcb);
+            }
+        }
+        currentCycle++;
+    }
+}
+
+void System::displayQueueInfo(string fileName, string message) {
+
+    ofstream outFile;
+
+    outFile.open(fileName.c_str(), std::ios::app);
+
+    if (outFile.fail()) {
+        IO::println("Couldn't open output file");
+        return;
+    }
+
+    outFile << message << endl << endl;
+
+    outFile << "*                                       Ready Queue                                                                             Blocked Queue                                   *" << endl;
+    outFile << "*********************************************************************************************************************************************************************************" << endl;
+    outFile << "*           NAME          |   CLASS   | PRIORITY |  STATE  | SUSPENDED | TIME REMAINING* *           NAME          |   CLASS   | PRIORITY |  STATE  | SUSPENDED | TIME REMAINING*" << endl;
+    outFile << "*-------------------------|-----------|----------|---------|-----------|---------------* *-------------------------|-----------|----------|---------|-----------|---------------*" << endl;
+
+    PCB* pcbReady;
+    PCB* pcbBlocked = mBlockedQueue.begin();
+
+    for (pcbReady = mReadyQueue.cbegin(); pcbReady != mReadyQueue.cend(); pcbReady = pcbReady->getNext()) {
+
+        if (pcbReady->getName().length() > 27) {
+            outFile << "*" + pcbReady->getName().substr(0, 22) + "...|";
+        } else {
+            outFile << "*" + pcbReady->getName();
+
+            for (int i = pcbReady->getName().length(); i < 25; i++) {
+                outFile << " ";
+            }
+
+            outFile << "|";
+        }
+
+        if (pcbReady->getProcessClass() == SYSTEM) {
+            outFile << "SYSTEM     |";
+        } else {
+            outFile << "APPLICATION|";
+        }
+
+        outFile << std::to_string(pcbReady->getPriority());
+
+        for (int i = std::to_string(pcbReady->getPriority()).length(); i < 10; i++) {
+            outFile << " ";
+        }
+
+        outFile << "|";
+
+        if (pcbReady->getState() == READY) {
+            outFile << "READY    |";
+        } else {
+            outFile << "BLOCKED  |";
+        }
+
+        if (pcbReady->getSuspend()) {
+            outFile << "YES        |";
+        } else {
+            outFile << "NO         |";
+        }
+
+        outFile << std::to_string(pcbReady->getTimeRemaining());
+
+        for (int i = std::to_string(pcbReady->getTimeRemaining()).length(); i < 15; i++) {
+            outFile << " ";
+        }
+
+        outFile << "* ";
+
+
+        if (pcbBlocked != mBlockedQueue.end()) {
+
+            if (pcbBlocked->getName().length() > 27) {
+                outFile << "*" + pcbBlocked->getName().substr(0, 22) + "...|";
+            } else {
+                outFile << "*" + pcbBlocked->getName();
+
+                for (int i = pcbBlocked->getName().length(); i < 25; i++) {
+                    outFile << " ";
+                }
+
+                outFile << "|";
+            }
+
+            if (pcbBlocked->getProcessClass() == SYSTEM) {
+                outFile << "SYSTEM     |";
+            } else {
+                outFile << "APPLICATION|";
+            }
+
+            outFile << std::to_string(pcbBlocked->getPriority());
+
+            for (int i = std::to_string(pcbBlocked->getPriority()).length(); i < 10; i++) {
+                outFile << " ";
+            }
+
+            outFile << "|";
+
+            if (pcbBlocked->getState() == READY) {
+                outFile << "READY    |";
+            } else {
+                outFile << "BLOCKED  |";
+            }
+
+            if (pcbBlocked->getSuspend()) {
+                outFile << "YES        |";
+            } else {
+                outFile << "NO         |";
+            }
+
+            outFile << std::to_string(pcbBlocked->getTimeRemaining());
+
+            for (int i = std::to_string(pcbBlocked->getTimeRemaining()).length(); i < 15; i++) {
+                outFile << " ";
+            }
+            pcbBlocked = pcbBlocked->getNext();
+        } else {
+            outFile << "*                                                                                      *";
+        }
+
+        outFile << endl;
+
+    }
+
+    outFile << "*********************************************************************************************************************************************************************************" << endl;
+
+    outFile << endl;
+
+    outFile.close();
 
 }

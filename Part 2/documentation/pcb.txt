@@ -1,0 +1,289 @@
+**********************************************************************************
+*
+* Documentation for the PCB Class
+*
+*
+* OVERVIEW: The PCB class stores all the information that is associated with a 
+* a process such as its name, class, priority, state, memory, suspention state, and
+* next and previous PCB nodes in order to form a list of PCB's
+*
+**********************************************************************************
+
+**********************************************************************************
+*CLASS DEFINITION
+**********************************************************************************
+**********************************************************************************
+*FUNCTIONS
+**********************************************************************************
+
+	function name: PCB
+
+	function purpose: PCB constructor that sets the name, processes class, and
+			  process priority
+
+	function prototype: 
+		
+		PCB::PCB(string name, PROCESS_CLASS processClass, int 
+			 processPriority)
+
+	function parameter(s):
+		
+		name - the name of the process
+		processClass - the class of the process. APPLICATION or SYSTEM
+		processPriority - the priority of the process. Must be between
+			-127 and 128
+**********************************************************************************
+
+	function name: getNext
+
+	function purpose: returns a pointer to the next PCB node
+
+	function prototype: 
+		
+		PCB* PCB::getNext()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: getPrev
+
+	function purpose: returns a pointer to the previous PCB node
+
+	function prototype: 
+		
+		PCB* PCB::getPrev()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: setNext
+
+	function purpose: sets the next PCB node
+
+	function prototype: 
+		
+		void PCB::setNext(PCB* pcb)
+
+	function parameter(s):
+		
+		pcb - the pcb pointer that will be set next to the current PCB
+**********************************************************************************
+
+	function name: setPrev
+
+	function purpose: sets the previous PCB node
+
+	function prototype: 
+		
+		void PCB::setPrev(PCB* pcb)
+
+	function parameter(s):
+		
+		pcb - the pcb pointer that will be set previous to the current PCB
+**********************************************************************************
+
+	function name: getName
+
+	function purpose: returns the name of the process
+
+	function prototype: 
+		
+		string PCB::getName()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: setName
+
+	function purpose: sets the name of the process
+
+	function prototype: 
+		
+		void PCB::setName(string name)
+
+	function parameter(s):
+		
+		name - the name of the process
+**********************************************************************************
+
+	function name: getProcessClass
+
+	function purpose: gets the process class of the process
+
+	function prototype: 
+		
+		PROCESS_CLASS PCB::getProcessClass()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: setProcessClass
+
+	function purpose: sets the process class of the process
+
+	function prototype: 
+		
+		void PCB::setProcessClass(PROCESS_CLASS processClass)
+
+	function parameter(s):
+		
+		processClass - the class of the process. APPLICATION or SYSTEM
+**********************************************************************************
+
+	function name: getPriority
+
+	function purpose: gets the priority of the process
+
+	function prototype: 
+		
+		int PCB::getPriority()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: setPriority
+
+	function purpose: sets the priority of the process
+
+	function prototype: 
+		
+		void PCB::setPriority(int value)
+
+	function parameter(s):
+		
+		value - the value of the new priority
+**********************************************************************************
+
+	function name: getState
+
+	function purpose: gets the state of the process
+
+	function prototype: 
+		
+		STATE PCB::getState()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: setState
+
+	function purpose: sets the state of the process to either ready or blocked
+
+	function prototype: 
+		
+		void PCB::setState(STATE state)
+
+	function parameter(s):
+		
+		state - the state to give the process
+**********************************************************************************
+
+	function name: getMemory
+
+	function purpose: gets the amount of memory that was set for the process
+
+	function prototype: 
+		
+		int PCB::getMemory()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: getSuspend
+
+	function purpose: gets the value of the suspend status
+
+	function prototype: 
+		
+		bool PCB::getSuspend()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: setSuspend
+
+	function purpose: sets the suspend status to either true or false
+
+	function prototype: 
+		
+		void PCB::setSuspend(bool suspend)
+
+	function parameter(s):
+		
+		suspend - the boolean value to set the member variable to
+**********************************************************************************
+**********************************************************************************
+*MEMBER VARIABLES
+**********************************************************************************
+
+	name: mProcessName
+	
+	purpose: holds the name of the process
+
+	declaration:
+	
+		string mProcessName
+**********************************************************************************
+
+	name: mProcessClass
+	
+	purpose: holds the process class of the process
+
+	declaration:
+	
+		PROCESS_CLASS mProcessClass
+**********************************************************************************
+
+	name: mProcessPriority
+	
+	purpose: holds the priority of the process
+
+	declaration:
+	
+		int mProcessPriority
+**********************************************************************************
+
+	name: mProcessState
+	
+	purpose: holds the state of the process
+
+	declaration:
+	
+		STATE mProcessState
+**********************************************************************************
+
+	name: mProcessMemory
+	
+	purpose: holds the memory space of the process
+
+	declaration:
+	
+		int mProcessMemory
+**********************************************************************************
+
+	name: mSuspend
+	
+	purpose: holds the suspension status of the process
+
+	declaration:
+	
+		bool mSuspend
+**********************************************************************************
+
+	name: mNext
+	
+	purpose: holds the pointer of the next process
+
+	declaration:
+	
+		PCB* mNext
+**********************************************************************************
+
+	name: mPrev
+	
+	purpose: holds the pointer of the previous process
+
+	declaration:
+	
+		PCB* mPrev
+**********************************************************************************

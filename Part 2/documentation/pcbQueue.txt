@@ -1,0 +1,133 @@
+**********************************************************************************
+*
+* Documentation for the pcbQueue Class
+*
+*
+* OVERVIEW: The pcbQueue class is a queue containing PCB's which handle insertions
+* and removals of processes within the queue
+*
+**********************************************************************************
+
+**********************************************************************************
+*CLASS DEFINITION
+**********************************************************************************
+**********************************************************************************
+*FUNCTIONS
+**********************************************************************************
+
+	function name: cend
+
+	function purpose: returns the end PCB pointer of the queue. NULL if one 
+			  is not there.
+
+	function prototype: 
+		
+		PCB* pcbQueue::cend()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: push_back
+
+	function purpose: adds a pcb to the end of the queue
+
+	function prototype: 
+		
+		void pcbQueue::push_back(PCB* pcb)
+
+	function parameter(s): 
+
+		pcb - the pcb to add at the end of the queue
+**********************************************************************************
+
+	function name: pop_front
+
+	function purpose: removes the front PCB from the queue and returns the PCB
+
+	function prototype: 
+		
+		PCB* pcbQueue::pop_front()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: front
+
+	function purpose: returns the PCB at the front of the queue
+
+	function prototype: 
+		
+		PCB* pcbQueue::front()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: remove
+
+	function purpose: removes the process from the queue but does not delete
+			  the memory associated with it. Returns true if one is
+			  found and removed. False if not.
+
+	function prototype: 
+		
+		bool pcbQueue::remove(PCB* pcb)
+
+	function parameter(s): 
+	
+		pcb - the pcb to remove from the queue
+**********************************************************************************
+
+	function name: numPCB
+
+	function purpose: returns the number of PCB's within the queue
+
+	function prototype: 
+		
+		int pcbQueue::numPCB()
+
+	function parameter(s): none
+**********************************************************************************
+
+	function name: contains
+
+	function purpose: returns a pointer to the pcb with the given name. If one
+			  is not found, NULL is returned
+
+	function prototype: 
+		
+		PCB* pcbQueue::contains(std::string pcbName)
+
+	function parameter(s): 
+	
+		pcbName - the name of the process to search for
+**********************************************************************************
+**********************************************************************************
+*MEMBER VARIABLES
+**********************************************************************************
+
+	name: mHead
+	
+	purpose: holds the head "dummy" pointer of the queue
+
+	declaration:
+	
+		PCB* mHead
+**********************************************************************************
+
+	name: mTail
+	
+	purpose: holds the tail "dummy" pointer of the queue
+
+	declaration:
+	
+		PCB* mTail
+**********************************************************************************
+
+	name: numPCBs
+	
+	purpose: holds the number of PCB's in the queue
+
+	declaration:
+	
+		int numPCBs
+**********************************************************************************

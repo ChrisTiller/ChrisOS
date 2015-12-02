@@ -11,6 +11,9 @@ public:
     PCB* const cend() const;
     PCB* const cbegin() const;
 
+    PCB* end() const;
+    PCB* begin() const;
+
     void push_back(PCB* pcb);
     PCB* pop_front();
 
@@ -19,6 +22,8 @@ public:
     int numPCB();
 
     PCB* contains(std::string pcbName);
+
+    bool isEmpty();
 
 private:
 

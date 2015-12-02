@@ -1,7 +1,7 @@
 #include "pcbQueue.h"
 #include <cassert>
 
-pcbQueue::pcbQueue() : numPCBs(0) {
+pcbQueue::pcbQueue() : numPCBs(0){
 
     mHead = new PCB();
     mTail = new PCB();
@@ -42,6 +42,14 @@ PCB* const pcbQueue::cend() const {
 }
 
 PCB* const pcbQueue::cbegin() const {
+    return mHead->getNext();
+}
+
+PCB* pcbQueue::end() const {
+     return mTail;
+}
+
+PCB* pcbQueue::begin() const {
     return mHead->getNext();
 }
 
@@ -107,4 +115,8 @@ bool pcbQueue::remove(PCB* pcb) {
         return true;
     }
     return false;
+}
+
+bool pcbQueue::isEmpty() {
+    return !static_cast<bool>(numPCBs);
 }

@@ -55,10 +55,10 @@ public:
 
 private:
     System() {
-        initscr();
-        mWidth = COLS;
-        mHeight = LINES;
-        endwin();
+        //initscr();
+        //mWidth = COLS;
+        //mHeight = LINES;
+        //endwin();
 
         loadSystemFunctions();
     };
@@ -69,6 +69,8 @@ private:
     void operator=(System const&) = delete;
 
     void loadSystemFunctions();
+    void loadJobs(const vector<string>& params, pcbQueue& jobQueue);
+
     bool findCommand(Command& command);
 
 
@@ -81,6 +83,9 @@ private:
     bool removePCB(PCB* pcb);
 
     void displayPCBInfo(PCB* pcb);
+
+    void displayQueueInfo(string fileName, string message);
+
 
     int mWidth;
     int mHeight;

@@ -73,6 +73,9 @@ void System::loadSystemFunctions() {
     systemFunctions.insert(std::make_pair("showBlocked", &System::showBlocked));
     systemFunctions.insert(std::make_pair("SJF", &System::SJF));
     systemFunctions.insert(std::make_pair("FIFO", &System::FIFO));
+    systemFunctions.insert(std::make_pair("STCF", &System::STCF));
+    systemFunctions.insert(std::make_pair("FPPS", &System::FPPS));
+    systemFunctions.insert(std::make_pair("RR", &System::RR));
 }
 
 bool System::findCommand(Command& command) {
@@ -929,7 +932,7 @@ void System::FIFO(const vector<string>& params) {
 
                 mReadyQueue.push_back(pcb);
 
-                displayQueueInfo("FIFO.txt", "New Process added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle));
+                displayQueueInfo("FIFO.txt", "New Process added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
             }
         }
 
@@ -943,13 +946,12 @@ void System::FIFO(const vector<string>& params) {
 
                 IO::println(pcb->getName());
 
-                displayQueueInfo("FIFO.txt", "Process finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle));
+                displayQueueInfo("FIFO.txt", "Process finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
 
                 freePCB(pcb);
             }
         }
     }
-
 }
 
 void System::loadJobs(const vector<string>& params, pcbQueue& jobQueue) {
@@ -1011,7 +1013,7 @@ void System::loadJobs(const vector<string>& params, pcbQueue& jobQueue) {
 void System::STCF(const vector<string>& params) {
 
     if (params.size() != 1) {
-        IO::println("FIFO takes only one parameter");
+        IO::println("STCF takes only one parameter");
         return;
     }
 
@@ -1021,7 +1023,7 @@ void System::STCF(const vector<string>& params) {
 
     int currentCycle = 0;
 
-    while (!bufferQueue.isEmpty() && !mReadyQueue.isEmpty()) {
+    while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
 
         if (!bufferQueue.isEmpty()) {
             if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
@@ -1029,21 +1031,32 @@ void System::STCF(const vector<string>& params) {
 
                 mReadyQueue.push_back(pcb);
 
-                displayQueueInfo("STCF.txt", "New PCB added: " + pcb->getName());
+                displayQueueInfo("STCF.txt", "New Process added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
 
-                for (PCB* pcb = mReadyQueue.begin(); pcb != mReadyQueue.end(); pcb = pcb->getNext()) {
-                    if (pcb->getTimeRemaining() < mReadyQueue.begin()->getTimeRemaining()) {
-                        PCB* kickout = mReadyQueue.pop_front();
-                        mReadyQueue.push_back(kickout);
-                        pcb = mReadyQueue.end();
+                PCB* temp;
+
+                for (PCB* pcb2 = mReadyQueue.begin(); pcb2 != mReadyQueue.end(); pcb2 = pcb2->getNext()) {
+
+                    if (pcb->getTimeRemaining() < pcb2->getTimeRemaining()) {
+                        temp = pcb2->getPrev();
+                        mReadyQueue.remove(pcb2);
+                        mReadyQueue.push_back(pcb2);
+
+                        displayQueueInfo("STCF.txt", "Process Kicked Out: " + pcb2->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                        pcb2 = temp;
+                    }
+
+                    if (pcb2 == pcb) {
+                        pcb2 = mReadyQueue.end()->getPrev();
                     }
                 }
             }
         }
 
+        currentCycle++;
+
         if (!mReadyQueue.isEmpty()) {
-
-
 
             mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
 
@@ -1052,11 +1065,138 @@ void System::STCF(const vector<string>& params) {
 
                 IO::println(pcb->getName());
 
+                displayQueueInfo("STCF.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
                 freePCB(pcb);
             }
         }
-        currentCycle++;
     }
+}
+
+void System::FPPS(const vector<string>& params) {
+
+    if (params.size() != 1) {
+        IO::println("FFPS takes only one parameter");
+        return;
+    }
+
+    pcbQueue bufferQueue;
+
+    loadJobs(params, bufferQueue);
+
+    int currentCycle = 0;
+
+    while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
+
+        if (!bufferQueue.isEmpty()) {
+            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+                PCB* pcb = bufferQueue.pop_front();
+
+                mReadyQueue.push_back(pcb);
+
+                displayQueueInfo("FPPS.txt", "New Process added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                PCB* temp;
+
+                for (PCB* pcb2 = mReadyQueue.begin(); pcb2 != mReadyQueue.end(); pcb2 = pcb2->getNext()) {
+
+                    if (pcb->getPriority() < pcb2->getPriority()) {
+                        temp = pcb2->getPrev();
+                        mReadyQueue.remove(pcb2);
+                        mReadyQueue.push_back(pcb2);
+
+                        displayQueueInfo("FPPS.txt", "Process Kicked Out: " + pcb2->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                        pcb2 = temp;
+                    }
+
+                    if (pcb2 == pcb) {
+                        pcb2 = mReadyQueue.end()->getPrev();
+                    }
+                }
+            }
+        }
+
+        currentCycle++;
+
+        if (!mReadyQueue.isEmpty()) {
+
+            mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
+
+            if (mReadyQueue.begin()->getTimeRemaining() == 0) {
+                PCB* pcb = mReadyQueue.pop_front();
+
+                IO::println(pcb->getName());
+
+                displayQueueInfo("FPPS.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                freePCB(pcb);
+            }
+        }
+    }
+
+}
+
+void System::RR(const vector<string>& params) {
+
+    if (params.size() != 2) {
+        IO::println("RR takes two parameters");
+        return;
+    }
+
+    pcbQueue bufferQueue;
+
+    loadJobs(params, bufferQueue);
+
+    int currentCycle = 0;
+    int quantum = atoi(params.at(1).c_str());
+    int quantumCounter = 0;
+
+    while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
+
+        if (!bufferQueue.isEmpty()) {
+            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+                PCB* pcb = bufferQueue.pop_front();
+
+                mReadyQueue.push_back(pcb);
+
+                displayQueueInfo("RR.txt", "Process Added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+            }
+        }
+
+        currentCycle++;
+        quantumCounter++;
+
+        if (!mReadyQueue.isEmpty()) {
+
+            mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
+
+            if (mReadyQueue.begin()->getTimeRemaining() == 0) {
+                PCB* pcb = mReadyQueue.pop_front();
+
+                IO::println(pcb->getName());
+
+                displayQueueInfo("RR.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                freePCB(pcb);
+
+                quantumCounter = 0;
+            }
+
+            if (quantumCounter == quantum) {
+
+                PCB* pcb = mReadyQueue.pop_front();
+                mReadyQueue.push_back(pcb);
+
+
+                displayQueueInfo("RR.txt", "Process Pre-empted: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                quantumCounter = 0;
+            }
+        }
+    }
+
 }
 
 void System::displayQueueInfo(string fileName, string message) {

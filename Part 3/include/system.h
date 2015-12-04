@@ -73,7 +73,6 @@ private:
 
     bool findCommand(Command& command);
 
-
     PCB* allocatePCB();
     void freePCB(PCB* pcb);
     PCB* setupPCB(string name, int priority, PROCESS_CLASS processClass);
@@ -86,6 +85,12 @@ private:
 
     void displayQueueInfo(string fileName, string message);
 
+    struct pcbTime {
+        int completionTime = 0;
+        int arrivalTime = 0;
+    };
+
+    int computeTurnaround(const vector<pcbTime> times);
 
     int mWidth;
     int mHeight;

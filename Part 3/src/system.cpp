@@ -76,6 +76,7 @@ void System::loadSystemFunctions() {
     systemFunctions.insert(std::make_pair("STCF", &System::STCF));
     systemFunctions.insert(std::make_pair("FPPS", &System::FPPS));
     systemFunctions.insert(std::make_pair("RR", &System::RR));
+    systemFunctions.insert(std::make_pair("MLFQ", &System::MLFQ));
 }
 
 bool System::findCommand(Command& command) {
@@ -880,6 +881,8 @@ void System::SJF(const vector<string>& params) {
 
     pcbQueue bufferQueue;
 
+    vector<pcbTime> times;
+
     loadJobs(params, bufferQueue);
 
     PCB* lowestTimeRemaining;
@@ -903,11 +906,24 @@ void System::SJF(const vector<string>& params) {
 
     showReady(vector<string>());
 
+    pcbTime time;
+    int completionTime = 0;
+
     while (mReadyQueue.numPCB() > 0) {
         PCB* frontPCB = mReadyQueue.pop_front();
         IO::println(frontPCB->getName());
+
+        time.completionTime = completionTime + frontPCB->getTimeRemaining();
+        completionTime = completionTime + frontPCB->getTimeRemaining();
+
+        time.arrivalTime = 0;
+
+        times.push_back(time);
+
         freePCB(frontPCB);
     }
+
+    IO::println("Turnaround Time: " + std::to_string(computeTurnaround(times)) + " cycles");
 
 }
 
@@ -919,6 +935,7 @@ void System::FIFO(const vector<string>& params) {
     }
 
     pcbQueue bufferQueue;
+    vector<pcbTime> times;
 
     loadJobs(params, bufferQueue);
 
@@ -927,7 +944,7 @@ void System::FIFO(const vector<string>& params) {
     while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
 
         if (!bufferQueue.isEmpty()) {
-            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+            while (bufferQueue.begin()->getArrivalTime() == currentCycle) {
                 PCB* pcb = bufferQueue.pop_front();
 
                 mReadyQueue.push_back(pcb);
@@ -937,6 +954,7 @@ void System::FIFO(const vector<string>& params) {
         }
 
         currentCycle++;
+        pcbTime time;
 
         if (!mReadyQueue.isEmpty()) {
             mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
@@ -946,12 +964,19 @@ void System::FIFO(const vector<string>& params) {
 
                 IO::println(pcb->getName());
 
+                time.arrivalTime = pcb->getArrivalTime();
+                time.completionTime = currentCycle;
+
+                times.push_back(time);
+
                 displayQueueInfo("FIFO.txt", "Process finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
 
                 freePCB(pcb);
             }
         }
     }
+
+    IO::println("Turnaround Time: " + std::to_string(computeTurnaround(times)) + " cycles");
 }
 
 void System::loadJobs(const vector<string>& params, pcbQueue& jobQueue) {
@@ -990,6 +1015,7 @@ void System::loadJobs(const vector<string>& params, pcbQueue& jobQueue) {
         // tokens.at(3) is the memory
         // tokens.at(4) is the time remaining
         // tokens.at(5) is the time of arrival
+        // tokens.at(6) is the percent of CPU
         if (tokens.at(1) == "A") {
             pcb = setupPCB(tokens.at(0), atoi(tokens.at(2).c_str()), APPLICATION);
         } else {
@@ -999,6 +1025,7 @@ void System::loadJobs(const vector<string>& params, pcbQueue& jobQueue) {
         pcb->setMemory(atoi(tokens.at(3).c_str()));
         pcb->setTimeRemaining(atoi(tokens.at(4).c_str()));
         pcb->setArrivalTime(atoi(tokens.at(5).c_str()));
+        pcb->setPercentOfCPU(atoi(tokens.at(6).c_str()));
 
         jobQueue.push_back(pcb);
 
@@ -1018,6 +1045,7 @@ void System::STCF(const vector<string>& params) {
     }
 
     pcbQueue bufferQueue;
+    vector<pcbTime> times;
 
     loadJobs(params, bufferQueue);
 
@@ -1026,7 +1054,7 @@ void System::STCF(const vector<string>& params) {
     while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
 
         if (!bufferQueue.isEmpty()) {
-            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+            while (bufferQueue.begin()->getArrivalTime() == currentCycle) {
                 PCB* pcb = bufferQueue.pop_front();
 
                 mReadyQueue.push_back(pcb);
@@ -1056,6 +1084,8 @@ void System::STCF(const vector<string>& params) {
 
         currentCycle++;
 
+        pcbTime time;
+
         if (!mReadyQueue.isEmpty()) {
 
             mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
@@ -1065,12 +1095,20 @@ void System::STCF(const vector<string>& params) {
 
                 IO::println(pcb->getName());
 
+                time.arrivalTime = pcb->getArrivalTime();
+                time.completionTime = currentCycle;
+
+                times.push_back(time);
+
                 displayQueueInfo("STCF.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
 
                 freePCB(pcb);
             }
         }
     }
+
+    IO::println("Turnaround Time: " + std::to_string(computeTurnaround(times)) + " cycles");
+
 }
 
 void System::FPPS(const vector<string>& params) {
@@ -1081,6 +1119,7 @@ void System::FPPS(const vector<string>& params) {
     }
 
     pcbQueue bufferQueue;
+    vector<pcbTime> times;
 
     loadJobs(params, bufferQueue);
 
@@ -1089,7 +1128,7 @@ void System::FPPS(const vector<string>& params) {
     while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
 
         if (!bufferQueue.isEmpty()) {
-            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+            while (bufferQueue.begin()->getArrivalTime() == currentCycle) {
                 PCB* pcb = bufferQueue.pop_front();
 
                 mReadyQueue.push_back(pcb);
@@ -1100,7 +1139,7 @@ void System::FPPS(const vector<string>& params) {
 
                 for (PCB* pcb2 = mReadyQueue.begin(); pcb2 != mReadyQueue.end(); pcb2 = pcb2->getNext()) {
 
-                    if (pcb->getPriority() < pcb2->getPriority()) {
+                    if (pcb->getPriority() > pcb2->getPriority()) {
                         temp = pcb2->getPrev();
                         mReadyQueue.remove(pcb2);
                         mReadyQueue.push_back(pcb2);
@@ -1118,6 +1157,7 @@ void System::FPPS(const vector<string>& params) {
         }
 
         currentCycle++;
+        pcbTime time;
 
         if (!mReadyQueue.isEmpty()) {
 
@@ -1128,6 +1168,11 @@ void System::FPPS(const vector<string>& params) {
 
                 IO::println(pcb->getName());
 
+                time.arrivalTime = pcb->getArrivalTime();
+                time.completionTime = currentCycle;
+
+                times.push_back(time);
+
                 displayQueueInfo("FPPS.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
 
                 freePCB(pcb);
@@ -1135,6 +1180,7 @@ void System::FPPS(const vector<string>& params) {
         }
     }
 
+    IO::println("Turnaround Time: " + std::to_string(computeTurnaround(times)) + " cycles");
 }
 
 void System::RR(const vector<string>& params) {
@@ -1145,6 +1191,7 @@ void System::RR(const vector<string>& params) {
     }
 
     pcbQueue bufferQueue;
+    vector<pcbTime> times;
 
     loadJobs(params, bufferQueue);
 
@@ -1155,7 +1202,7 @@ void System::RR(const vector<string>& params) {
     while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
 
         if (!bufferQueue.isEmpty()) {
-            if (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+            while (bufferQueue.begin()->getArrivalTime() == currentCycle) {
                 PCB* pcb = bufferQueue.pop_front();
 
                 mReadyQueue.push_back(pcb);
@@ -1168,6 +1215,8 @@ void System::RR(const vector<string>& params) {
         currentCycle++;
         quantumCounter++;
 
+        pcbTime time;
+
         if (!mReadyQueue.isEmpty()) {
 
             mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
@@ -1176,6 +1225,11 @@ void System::RR(const vector<string>& params) {
                 PCB* pcb = mReadyQueue.pop_front();
 
                 IO::println(pcb->getName());
+
+                time.arrivalTime = pcb->getArrivalTime();
+                time.completionTime = currentCycle;
+
+                times.push_back(time);
 
                 displayQueueInfo("RR.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
 
@@ -1197,6 +1251,157 @@ void System::RR(const vector<string>& params) {
         }
     }
 
+    IO::println("Turnaround Time: " + std::to_string(computeTurnaround(times)) + " cycles");
+}
+
+void System::MLFQ(const vector<string>& params) {
+
+    if (params.size() != 4) {
+        IO::println("MLFQ takes four parameters");
+        return;
+    }
+
+    pcbQueue bufferQueue;
+    pcbQueue sortingQueue;
+    vector<pcbTime> times;
+
+    loadJobs(params, bufferQueue);
+
+    int currentCycle = 0;
+    int quantum = atoi(params.at(2).c_str());
+    int quantumCounter = 0;
+
+    int numQueues = atoi(params.at(1).c_str());
+    int maxCycles = atoi(params.at(3).c_str());
+    int cycleCounter = 0;
+
+    int priorityToRun = numQueues - 1;
+
+    while (!bufferQueue.isEmpty() || !mReadyQueue.isEmpty()) {
+
+        if (!bufferQueue.isEmpty()) {
+
+            while (bufferQueue.begin()->getArrivalTime() == currentCycle) {
+
+                PCB* pcb = bufferQueue.pop_front();
+
+                pcb->setPrioirty(numQueues - 1);
+
+                mReadyQueue.push_back(pcb);
+
+                while (!mReadyQueue.isEmpty()) {
+
+                    sortingQueue.push_back(mReadyQueue.pop_front());
+
+                }
+
+                PCB* highestPriority;
+
+                while (!sortingQueue.isEmpty()) {
+
+                    highestPriority = sortingQueue.cbegin();
+
+                    for (PCB* pcb2 = sortingQueue.cbegin(); pcb2 != sortingQueue.cend(); pcb2 = pcb2->getNext()) {
+                        if ((pcb2->getPriority()) > (highestPriority->getPriority())) {
+                            highestPriority = pcb2;
+                        }
+                    }
+
+                    sortingQueue.remove(highestPriority);
+                    mReadyQueue.push_back(highestPriority);
+
+                }
+
+                displayQueueInfo("MLFQ.txt", "Process Added: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+            }
+        }
+
+        currentCycle++;
+        cycleCounter++;
+
+        pcbTime time;
+
+        if (!mReadyQueue.isEmpty()) {
+
+            if (mReadyQueue.begin()->getPriority() == priorityToRun) {
+
+                quantumCounter++;
+
+                mReadyQueue.begin()->setTimeRemaining(mReadyQueue.begin()->getTimeRemaining() - 1);
+
+
+                if (mReadyQueue.begin()->getTimeRemaining() == 0) {
+                    PCB* pcb = mReadyQueue.pop_front();
+
+                    IO::println(pcb->getName());
+
+                    time.arrivalTime = pcb->getArrivalTime();
+                    time.completionTime = currentCycle;
+
+                    times.push_back(time);
+
+                    displayQueueInfo("MLFQ.txt", "Process Finished: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                    freePCB(pcb);
+
+                    quantumCounter = 0;
+                }
+
+                // if a process doesn't finish within its time slice, it gets pre-empted and reduced priority
+                if (quantumCounter == quantum) {
+
+                    PCB* pcb = mReadyQueue.pop_front();
+
+                    if (pcb->getPriority() > 0) {
+                        pcb->setPrioirty(pcb->getPriority() - 1);
+                    }
+
+                    mReadyQueue.push_back(pcb);
+
+                    while (!mReadyQueue.isEmpty()) {
+                        sortingQueue.push_back(mReadyQueue.pop_front());
+                    }
+
+                    PCB* highestPriority;
+
+                    while (!sortingQueue.isEmpty()) {
+
+                        highestPriority = sortingQueue.cbegin();
+
+                        for (PCB* pcb2 = sortingQueue.cbegin(); pcb2 != sortingQueue.cend(); pcb2 = pcb2->getNext()) {
+                            if ((pcb2->getPriority()) > (highestPriority->getPriority())) {
+                                highestPriority = pcb2;
+                            }
+                        }
+
+                        sortingQueue.remove(highestPriority);
+                        mReadyQueue.push_back(highestPriority);
+                    }
+
+                    displayQueueInfo("MLFQ.txt", "Process Pre-empted: " + pcb->getName() + "\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                    quantumCounter = 0;
+                }
+
+                // if the cycleCounter reaches the maxCycles, all process in the queue goes back to the highes priority
+                if (cycleCounter == maxCycles) {
+
+                    for (PCB* pcb = mReadyQueue.begin(); pcb != mReadyQueue.end(); pcb = pcb->getNext()) {
+                        pcb->setPrioirty(numQueues - 1);
+                    }
+
+                    displayQueueInfo("MLFQ.txt", "Process Priority Reset\nCurrent Cycle No.: " + std::to_string(currentCycle) + "\nRunning Process: " + mReadyQueue.begin()->getName());
+
+                    cycleCounter = 0;
+
+                }
+            }
+            priorityToRun = mReadyQueue.begin()->getPriority();
+        }
+    }
+
+    IO::println("Turnaround Time: " + std::to_string(computeTurnaround(times)) + " cycles");
 }
 
 void System::displayQueueInfo(string fileName, string message) {
@@ -1328,5 +1533,21 @@ void System::displayQueueInfo(string fileName, string message) {
     outFile << endl;
 
     outFile.close();
+
+}
+
+int System::computeTurnaround(const vector<pcbTime> times) {
+
+    int total = 0;
+
+    for (int i = 0; i < times.size(); i++) {
+        total =  total + (times.at(i).completionTime - times.at(i).arrivalTime);
+    }
+
+    if (times.size() == 0) {
+        return -1;
+    }
+
+    return total / times.size();
 
 }

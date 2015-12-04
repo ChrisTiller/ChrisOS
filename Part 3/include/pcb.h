@@ -68,6 +68,9 @@ public:
     void setArrivalTime(int arrivalTime) { mArrivalTime = arrivalTime; }
     int getArrivalTime() { return mArrivalTime; }
 
+    void setPercentOfCPU(int percent) { mPercent = percent; }
+    int getPercentOfCPU() { return mPercent; }
+
 private:
     string mProcessName;
     PROCESS_CLASS mProcessClass;
@@ -77,6 +80,7 @@ private:
     bool mSuspend;
     int mTimeRemaining;
     int mArrivalTime;
+    int mPercent;
 
     PCB* mNext;
     PCB* mPrev;
